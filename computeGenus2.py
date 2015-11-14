@@ -25,6 +25,8 @@
 #Dev Notes:
 	#Search for 'TODO's
 	#Leave 'REMOVES' inline with temporary code so I can clean up easily.
+	#META TODO's:
+		#decide on rotation system format (list of lists of integers or list of lists of ordered pairs)
 
 import igraph
 import numpy
@@ -60,21 +62,70 @@ def generateCandidateGraphs():
 	return C_g
 
 def removeIsomorphicCopies(temp):
-	#TODO
 	C_g = []
+	while len(temp) > 0:
+		# Remove the first graph from temp and insert it at the begining of C_g
+		C_g.insert(0, temp.pop(0))
+		# Compare the new graph, C_g[0], that we inserted at the begining of C_g to every graph remaining in temp.
+		for indexOfTempGraph, tempGraph in reversed(list(enumerate(temp))): # We work through the temp list backwards.
+		# Note: tempGraph is the graph in temp which we are currently examining, and indexOfTempGraph is it's index in temp. So temp[indexOfTempGraph] is tempGraph.
+		# Compare C_g[0] to tempGraph and determine whether they are isomorpic.
+			if C_g[0].isomorphic(tempGraph):
+				# If they are isomorphic then remove tempGraph from temp.
+				temp.remove(indexOfTempGraph)
 	return C_g
 
 def atMostGPulsOneBoomerangs(graph):
-	#TODO - boolean
-	return
+	global g
+	# List the degrees of each vertex in graph.
+	listOfDegrees = graph.degree()
+	# Make a list of the vertices with degree 2.
+	verticesWithDegreeTwo = [i for i, j in enumerate(listOfDegrees) if j==2]
+	# Count the number of degree two vertices that are boomerangs.
+	numberOfBoomerangs = [isABoomerang(vertex, graph) for vertex in verticesWithDegreeTwo].count(True)
+	# Return True if numberOfBoomerangs is <= g+1
+	if numberOfBoomerangs <= g + 1:
+		return True
+	# Otherwise return False
+	return False
 
 def allDegreeTwoVerticesAreBoomerangs(graph):
-	#TODO - boolean
-	return
+	# List the degrees of each vertex in graph.
+	listOfDegrees = graph.degree()
+	# Make a list of the vertices with degree 2.
+	verticesWithDegreeTwo = [i for i, j in enumerate(listOfDegrees) if j==2]
+	# Examine each vertex of degree two to see if it's a boomerang.
+	while len(verticesWithDegreeTwo) > 0:
+		vertexToExamine = verticesWithDegreeTwo.pop()
+		# If it's not a boomerange return False
+		if not isABoomerang(vertexToExamine,graph):
+			return False
+	# If all degree two vertices are boomerangs then return True.
+	return True
+
+def isABoomerang(vertexToExamine, graph):
+	# Check that it has degree two. Return False if not.
+	if graph.degree(vertexToExamine) != 2:
+		return False
+	# List all the neighbors of vertexToExamine.
+	neighbors = graph.neighbors(vertexToExamine)
+	# Count the number of neighbors of vertexToExamine that are not vertexToExamine itself.
+	numberOfNonSelfNeighbors = len([i for i, j in enumerate(neighbors) if j!=vertexToExamine])
+	# Return True if numberOfNonSelfNeighbors is 0.
+	if numberOfNonSelfNeighbors == 0:
+		return True
+	# Return False otherwise.
+	return False
 
 def hasNoVertexOfOddDegree(graph):
-	#TODO - boolean
-	return
+	# Goal: This function returns True if graph has no vertex of odd degree, and returns False otherwise.
+	# Get a list of the degrees of all the vertices in graph.
+	listOfDegrees = graph.degree()
+	# Count how many vertices have odd degree.
+	numOfVerticesWithOddDegree = [x%2 for x in listOfDegrees].count(1)
+	# Return True if and only if zero vertices have odd degree.
+	return numOfVerticesWithOddDegree == 0
+
 def generateAllGraphs(V, E):
 	#TODO
 	# Goal: Return a list of all graphs on V vertices with E edges.
