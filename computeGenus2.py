@@ -24,38 +24,41 @@
 
 #Dev Notes:
 	#Search for 'TODO's
-	#Leave 'REMOVES' inline with temporary code so I can clean up easily.
+	#Leave 'REMOVE's inline with temporary code so I can clean up easily.
 	#META TODO's:
-		#decide on rotation system format (list of lists of integers or list of lists of ordered pairs)
+				# getBoundaryComponenets(rotationSystem) (implement boundary walk algo.)
+				# uniqueRotationsUpToCyclicPermutations(listOfEdgeEnds)
+				# isTwoSided(rotationSystem)
+				# debug.
+				# (optional) write unit tests.
 
 import igraph
-import numpy
-import math
+import itertools
 
 def generateCandidateGraphs():
 	global g
 	C_g = []
 	temp = [] # Used to hold discovered candiate graphs until checking for and removing isomorphic copies.
 	## (1) Find all graphs G for which:
-	#		1a. V <= 2g
-	#		1b. V <= E <= 2g + V
-	#		1c. G has no vertex of odd degree
-	#		1d. The only vertices of G with degree two are boomerangs
-	#		1e. G has at most g+1 boomerangs
+	#		1a. V <= 2g.
+	#		1b. V <= E <= 2g + V  #REMOVE - change back to 0 < E <= 2g + V.
+	#		1c. G has no vertex of odd degree.
+	#		1d. The only vertices of G with degree two are boomerangs.
+	#		1e. G has at most g+1 boomerangs.
 
 	# 1a. V <= 2g
 	for V in range(1, 2*g+1):
-		# 1b. V <= E <= 2g + V
-		for E in range(V, 2*g+V+1):
-			# Generate all graphs with V vertices and E edges
+		# 1b. V <= E <= 2g + V.
+		for E in range(V, 2*g+V+1): #REMOVE - change back to 0 < E <= 2g + V.
+			# Generate all graphs with V vertices and E edges.
 			allGraphs = generateAllGraphs(V, E)
 			# Check each of these graphs for properties 1c, 1d, and 1e.
 			while len(allGraphs) > 0:
 				graph = allGraphs.pop()
-				# 1c. G has no vertex of odd degree
-				# 1d. The only vertices of G with degree two are boomerangs
-				# 1e. G has at most g+1 boomerangs
-				if hasNoVertexOfOddDegree(graph) and allDegreeTwoVerticesAreBoomerangs(graph) and atMostGPulsOneBoomerangs(graph):
+				# 1c. G has no vertex of odd degree.
+				# 1d. The only vertices of G with degree two are boomerangs.
+				# 1e. G has at most g+1 boomerangs.
+				if hasNoVertexOfOddDegree(graph) and allDegreeTwoVerticesAreBoomerangs(graph) and atMostGPlusOneBoomerangs(graph):
 					temp.append(graph.copy()) # Store this candidate graph in the list named 'temp'.
 	## (2) Remove any isomorphic duplicates.
 		C_g = removeIsomorphicCopies(temp)
@@ -64,18 +67,13 @@ def generateCandidateGraphs():
 def removeIsomorphicCopies(temp):
 	C_g = []
 	while len(temp) > 0:
-		# Remove the first graph from temp and insert it at the begining of C_g
+		# Remove the first graph from temp and insert it at the begining of C_g.
 		C_g.insert(0, temp.pop(0))
-		# Compare the new graph, C_g[0], that we inserted at the begining of C_g to every graph remaining in temp.
-		for indexOfTempGraph, tempGraph in reversed(list(enumerate(temp))): # We work through the temp list backwards.
-		# Note: tempGraph is the graph in temp which we are currently examining, and indexOfTempGraph is it's index in temp. So temp[indexOfTempGraph] is tempGraph.
-		# Compare C_g[0] to tempGraph and determine whether they are isomorpic.
-			if C_g[0].isomorphic(tempGraph):
-				# If they are isomorphic then remove tempGraph from temp.
-				temp.remove(indexOfTempGraph)
+		# Remove from temp all graphs isomorphic to C_g[0].
+		temp = [x for x in temp if not C_g[0].isomorphic(x)]
 	return C_g
 
-def atMostGPulsOneBoomerangs(graph):
+def atMostGPlusOneBoomerangs(graph):
 	global g
 	# List the degrees of each vertex in graph.
 	listOfDegrees = graph.degree()
@@ -97,7 +95,7 @@ def allDegreeTwoVerticesAreBoomerangs(graph):
 	# Examine each vertex of degree two to see if it's a boomerang.
 	while len(verticesWithDegreeTwo) > 0:
 		vertexToExamine = verticesWithDegreeTwo.pop()
-		# If it's not a boomerange return False
+		# If it's not a boomerange return False.
 		if not isABoomerang(vertexToExamine,graph):
 			return False
 	# If all degree two vertices are boomerangs then return True.
@@ -127,9 +125,22 @@ def hasNoVertexOfOddDegree(graph):
 	return numOfVerticesWithOddDegree == 0
 
 def generateAllGraphs(V, E):
-	#TODO
 	# Goal: Return a list of all graphs on V vertices with E edges.
-	return
+	allGraphs=[]
+	# IMPORTANT: DO NOT return any graphs with isolated vertices!
+	## (1) List every edge that can possibly occur on the V vertices.
+	allPossibleEdges = list(itertools.combinations_with_replacement(range(0,V),2))
+	## (2) List every possible way of choosing E edges from allPossibleEdges with replacement.
+	allPossibleWaysOfChoosingTheEdges = itertools.combinations_with_replacement(allPossibleEdges,E)
+	## (3) For each choice in allPossibleWaysOfChoosingTheEdges, create a graph on V vertices with those edge choices.
+	for choice in allPossibleWaysOfChoosingTheEdges:
+		# Create a graph, g, with with V vertices and the chosen edges.
+		g = igraph.Graph(V)
+		g.add_edges(list(choice))
+		# If the resulting graph does not contain any isolated vertices then store it.
+		if g.degree().count(0) == 0:
+			allGraphs.append(g)
+	return allGraphs
 
 def findMinimalSeparatingGraphsIn(C_g):
 	# The input C_g is a list of candidate graphs.
@@ -146,7 +157,7 @@ def reportResults(G_g):
 
 def thereExistsAMinimalSeparatingEmbeddingOf(candidateGraph):
 	# Description: Returns True if and only if there exists a minimal separating embedding of candidateGraph into a genus 2 surface.
-	## (1) Generate all rotation systems on candidateGraph
+	## (1) Generate all rotation systems on candidateGraph.
 	rotationSystems = generateAllRotationSystemsOn(candidateGraph)
 	## (2) Check whether any of them have a minimal separating embedding into a surface of genus 2.
 	for rotationSystem in rotationSystems:
@@ -160,7 +171,7 @@ def isTwoSided(rotationSystem):
 
 def SatisfiesTheorem4(rotationSystem,candidateGraph):
 	global g
-	## Check whether g >= (E-V+n)/2 - 1
+	## Check whether g >= (E-V+n)/2 - 1.
 	n = len(getBoundaryComponenets(rotationSystem)) # Number of boundary components
 	E = candidateGraph.ecount()	# Number of edges 
 	V = candidateGraph.vcount()	# Number of vertices
@@ -169,14 +180,35 @@ def SatisfiesTheorem4(rotationSystem,candidateGraph):
 	return False
 
 def getBoundaryComponenets(rotationSystem):
- 	#TODO - apply the boundary-walk algorithm and return a list of boundary components
+ 	#TODO
+ 	# Goal: Apply the boundary-walk algorithm and return a list of boundary components for the reduced band decomposition corresponding to rotationSystem.
  	return
 
 def generateAllRotationSystemsOn(candidateGraph):
+	# Goal: Generate all rotation systems on candidateGraph.
+	## (1) For each vertex, v, find the list of edge-ends incident to that vertex and store that list of edges in incidentEdgeEnds[v].
+	incidentEdgeEnds = []	# incidentEdgeEnds[v] will return a list of edges incident to vertex v.
+							# NOTE: Edges are labeled by thier index in candidateGraph.get_edgelist(). 
+							# NOTE: For example, edge '4' refers to candidateGraph.get_edgelist()[4].
+	for v in range(0, len(candidateGraph.vs())):
+		edgeEndsIncidentToV = [(edgeIndex, 0) for edgeIndex, (edgeEndZero, edgeEndOne) in enumerate(candidateGraph.get_edgelist()) if edgeEndZero==v]
+		edgeEndsIncidentToV += [(edgeIndex, 1) for edgeIndex, (edgeEndZero, edgeEndOne) in enumerate(candidateGraph.get_edgelist()) if edgeEndOne==v]
+		incidentEdgeEnds.insert(v, edgeEndsIncidentToV)
+	## (2) For each vertex, v, generate a list of all possible rotations at v. Store this list at allPossibleRotationsAt[v].
+	# Initiate empty list.
+	allPossibleRotationsAt = []
+	for v in range(0,len(candidateGraph.vs())):
+		allPossibleRotationsAt.insert(v, uniqueRotationsUpToCyclicPermutations(incidentEdgeEnds(v)))
+	## (3) Generate all rotation systems on candidateGraph.
+	listOfRotationOptions = [allPossibleRotationsAt[v] for v in range(0, len(candidateGraph.vs()))]
+	allRotationSystems = [list(rotationSystem) for rotationSystem in itertools.product(*listOfRotationOptions)]
+	# Return the list.
+	return allRotationSystems
+
+def uniqueRotationsUpToCyclicPermutations(listOfEdgeEnds):
 	#TODO
-	# Generate all rotation systems on candidateGraph.
-	rotationSystems = []
-	return rotationSystems
+	# Goal: Return a list of all permutations of listOfEdgeEnds -- unique up to cyclic permutations.
+	return
 
 def main():
 	global g
