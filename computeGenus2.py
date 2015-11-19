@@ -67,7 +67,7 @@ def generateCandidateGraphs():
 def removeIsomorphicCopies(temp):
 	C_g = []
 	while len(temp) > 0:
-		# Remove the first graph from temp and insert it at the begining of C_g.
+		# Pop the first graph from temp and insert it at the begining of C_g.
 		C_g.insert(0, temp.pop(0))
 		# Remove from temp all graphs isomorphic to C_g[0].
 		temp = [x for x in temp if not C_g[0].isomorphic(x)]
@@ -213,38 +213,58 @@ def rotationsUpToCyclicPermutation(listOfEdgeEnds):
 	# NOTE: While that would make code-verification easier, doing so results in burdensome runtime of the overall program.
 	# NOTE: As a result, this is one area where I think the speedups are worth the increased code complexity.
 	# NOTE: If the additional code complexity introduced by this function is burdensome to the referee, please let me know.
-	# NOTE: I'm happy to refactor the code for this function to make its verification simpler -- albeit at the cost of increased time complexity of the overall program.
-	
-	# (1) Cycle through every permutation of listOfEdgeEnds.
-	allPermutations = itertools.permutations(listOfEdgeEnds)
-	for permutation in allPermutations:
-		# NOTE: This permutation has len(listOfEdges) equivalent permutations. Namely all the cyclic permutations of this one.
-		# NOTE: From among these equivalent permutations, we'll choose one 'standard representative', and store it in rotationsToReturn.
-		# NOTE: We choose this standard representative as follows.
-		# (2) Choose a standard representative.
-		# Identify the smallest labelled edge.
-		EdgeLabels = [a for (a,b) in permutation]
-		smallestEdgeLabel = min(EdgeLabels)
-		# Count haw many edge ends of this edge show up at this vertex (must be either 1 or 2).
-		indicesOfSmallestEdgeLabel = [i for i,j in enumerate(EdgeLabels) if j == smallestEdgeLabel]
-		numberOfSmallestEdgeLabels = len(indicesOfSmallestEdgeLabel)
-		# If there is only one of them, then shift (cyclically permute) permutation so that the smallest labelled edge is in postion [0] of the rotation.
-		if numberOfSmallestEdgeLabels == 1:
-			standardRepresentative = numpy.roll(permutation, -indicesOfSmallestEdgeLabel[0]).tolist()
-		else:
-			# Else if there are two smallest-labelled edges in the list, then look at the following to equivalent permutations.
-			# (a) The permutation where the first of the smallest-labelled edge is shifted to position [0] of the rotation.
-			firstOption = numpy.roll(permutation, -indicesOfSmallestEdgeLabel[0]).tolist()
-			# (b) The permutation where the second of the smallest-labelled edge is shifted to position [0] of the rotation.
-			secondOption = numpy.roll(permutation, -indicesOfSmallestEdgeLabel[1]).tolist()
-			# Of these two, we choose the one that comes first lexicographically. 
-			if firstOption <= secondOption:
-				standardRepresentative = firstOption
-			else:
-				standardRepresentative = secondOption
-		# (3) Check to see whether that standard representative has already been stored in rotationsToReturn. If it's not, append it.
-		if not [a for (a,b) in permutation] in [[a for (a,b) in rotation] for rotation in rotationsToReturn]:
+	# NOTE: I'm happy to refactor the code for this function to make its verification simpler -- at the cost of an increased runtime for the overall program.
+	# NOTE: See README.md for a high level explination of how this function works.
+	# (1) Find the smallest-labelled edge in listOfEdges.
+	edgeLabels = [a for (a,b) in listOfEdgeEnds]
+	smallestEdgeLabel = min(edgeLabels)
+	# (2) Count how many edgeEnds in listOfEdges have this edge label (must be either 1 or 2).
+	indicesOfSmallestEdgeLabel = [i for i,j in enumerate(edgeLabels) if j == smallestEdgeLabel]
+	numberOfSmallestEdgeLabels = len(indicesOfSmallestEdgeLabel)
+	if numberOfSmallestEdgeLabels == 1:
+		# Make a copy of listOfEdges that we can manipulate locally. Remove smallest-labelled edge from the list.
+		listOfEdgeEndsWithoutSmallest = list(listOfEdgeEnds)
+		smallestLabelledEdge = listOfEdgeEndsWithoutSmallest.pop(indicesOfSmallestEdgeLabel[0])
+		# List all possible permutations of listOfEdgeEndsWothoutSmallest.
+		allPermutations = itertools.permutations(listOfEdgeEndsWithoutSmallest)
+		# Attach smallestLbelledEdge to the begining of each of these permutations.
+		for permutation in allPermutations:
+			standardRepresentative = list(permutation)
+			standardRepresentative.insert(0, smallestLabelledEdge)
+			# Append the result to rotationsToReturn.
 			rotationsToReturn.append(standardRepresentative)
+	else: # Then both edge-ends of the smallest-labelled edge appear at this vertex.
+		# Identify which of the smallest-labelled edge ends is edgeEndZero.
+		print "\n\n Running correct algo for multiple smallest edge ends." # REMOVE
+		if listOfEdgeEnds[indicesOfSmallestEdgeLabel[0]][1] == 0:
+			indexOfSmallestEdgeEnd = indicesOfSmallestEdgeLabel[0]
+		else:
+			indexOfSmallestEdgeEnd = indicesOfSmallestEdgeLabel[1]
+		# Make a copy of listOfEdges that we can manipulate locally. Remove smallest-labelled edge (with edgeEndZero) from the list.
+		listOfEdgeEndsWithoutSmallest = list(listOfEdgeEnds)
+		smallestLabelledEdge = listOfEdgeEndsWithoutSmallest.pop(indexOfSmallestEdgeEnd)
+		# List all possible permutations of listOfEdgeEndsWothoutSmallest.
+		allPermutations = itertools.permutations(listOfEdgeEndsWithoutSmallest)
+		# Attach smallestLbelledEdge to the begining of each of these permutations.
+		for permutation in allPermutations:
+			# There are two possible representatives for the rotation associated with this permutation.
+			# Option1 is just the smallestLabelledEdge followed by the rest of the edges in the permutation.
+			option1 = list(permutation)
+			option1.insert(0, smallestLabelledEdge)
+			option1 = [list(element) for element in option1] # This converts option1 from a list of tuples to a list of lists so we can compare to option2 below.
+			# option2 is option1 shifted so that the other edge-end of smallest-labelled edge appears in the first position of the rotation.
+			option2 = list(permutation)
+			option2.insert(0, smallestLabelledEdge)
+			indexOfOtherEnd = option2.index((smallestEdgeLabel,1))
+			option2 = numpy.roll(option2, -indexOfOtherEnd, 0).tolist()
+			# Now choose which of the two options is lexicographically smaller (considering only the first entry of each tuple).
+			if [a for [a,b] in option1] <= [a for [a,b] in option2]:
+				standardRepresentative = option1
+			else:
+				standardRepresentative = option2
+			# If we haven't already stored this rotation in rotationsToReturn, then do so now.
+			if not [a for (a,b) in standardRepresentative] in [[a for (a,b) in rotation] for rotation in rotationsToReturn]:
+				rotationsToReturn.append(standardRepresentative)
 	return rotationsToReturn
 
 def main():
