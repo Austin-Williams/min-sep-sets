@@ -27,13 +27,13 @@
 	#Leave 'REMOVE's inline with temporary code so I can clean up easily.
 	#META TODO's:
 				# getBoundaryComponenets(rotationSystem) (implement boundary walk algo.)
-				# uniqueRotationsUpToCyclicPermutations(listOfEdgeEnds)
 				# isTwoSided(rotationSystem)
 				# debug.
 				# (optional) write unit tests.
 
 import igraph
 import itertools
+import numpy
 
 def generateCandidateGraphs():
 	global g
@@ -194,21 +194,58 @@ def generateAllRotationSystemsOn(candidateGraph):
 		edgeEndsIncidentToV = [(edgeIndex, 0) for edgeIndex, (edgeEndZero, edgeEndOne) in enumerate(candidateGraph.get_edgelist()) if edgeEndZero==v]
 		edgeEndsIncidentToV += [(edgeIndex, 1) for edgeIndex, (edgeEndZero, edgeEndOne) in enumerate(candidateGraph.get_edgelist()) if edgeEndOne==v]
 		incidentEdgeEnds.insert(v, edgeEndsIncidentToV)
+		# NOTE: Edges are stored in candidateGraph.get_edgelist() as ordered pairs (a,b). We refer to 'a' and 'b' as 'edgeEndZero' and 'edgeEndOne', respectively.
 	## (2) For each vertex, v, generate a list of all possible rotations at v. Store this list at allPossibleRotationsAt[v].
 	# Initiate empty list.
 	allPossibleRotationsAt = []
 	for v in range(0,len(candidateGraph.vs())):
-		allPossibleRotationsAt.insert(v, uniqueRotationsUpToCyclicPermutations(incidentEdgeEnds(v)))
+		allPossibleRotationsAt.insert(v, rotationsUpToCyclicPermutation(incidentEdgeEnds(v)))
 	## (3) Generate all rotation systems on candidateGraph.
 	listOfRotationOptions = [allPossibleRotationsAt[v] for v in range(0, len(candidateGraph.vs()))]
 	allRotationSystems = [list(rotationSystem) for rotationSystem in itertools.product(*listOfRotationOptions)]
 	# Return the list.
 	return allRotationSystems
 
-def uniqueRotationsUpToCyclicPermutations(listOfEdgeEnds):
-	#TODO
-	# Goal: Return a list of all permutations of listOfEdgeEnds -- unique up to cyclic permutations.
-	return
+def rotationsUpToCyclicPermutation(listOfEdgeEnds):
+	# Goal: Return a list of all rotations of listOfEdgeEnds -- unique up to cyclic permutations.
+	rotationsToReturn = []
+	# NOTE: Naively, we could simply return [x for x in itertools.permutations(listOfEdgeEnds)], and everything would work fine.
+	# NOTE: While that would make code-verification easier, doing so results in burdensome runtime of the overall program.
+	# NOTE: As a result, this is one area where I think the speedups are worth the increased code complexity.
+	# NOTE: If the additional code complexity introduced by this function is burdensome to the referee, please let me know.
+	# NOTE: I'm happy to refactor the code for this function to make its verification simpler -- albeit at the cost of increased time complexity of the overall program.
+	
+	# (1) Cycle through every permutation of listOfEdgeEnds.
+	allPermutations = itertools.permutations(listOfEdgeEnds)
+	for permutation in allPermutations:
+		# NOTE: This permutation has len(listOfEdges) equivalent permutations. Namely all the cyclic permutations of this one.
+		# NOTE: From among these equivalent permutations, we'll choose one 'standard representative', and store it in rotationsToReturn.
+		# NOTE: We choose this standard representative as follows.
+		# (2) Choose a standard representative.
+		# Identify the smallest labelled edge.
+		EdgeLabels = [a for (a,b) in permutation]
+		smallestEdgeLabel = min(EdgeLabels)
+		# Count haw many edge ends of this edge show up at this vertex (must be either 1 or 2).
+		indicesOfSmallestEdgeLabel = [i for i,j in enumerate(EdgeLabels) if j == smallestEdgeLabel]
+		numberOfSmallestEdgeLabels = len(indicesOfSmallestEdgeLabel)
+		# If there is only one of them, then shift (cyclically permute) permutation so that the smallest labelled edge is in postion [0] of the rotation.
+		if numberOfSmallestEdgeLabels == 1:
+			standardRepresentative = numpy.roll(permutation, -indicesOfSmallestEdgeLabel[0]).tolist()
+		else:
+			# Else if there are two smallest-labelled edges in the list, then look at the following to equivalent permutations.
+			# (a) The permutation where the first of the smallest-labelled edge is shifted to position [0] of the rotation.
+			firstOption = numpy.roll(permutation, -indicesOfSmallestEdgeLabel[0]).tolist()
+			# (b) The permutation where the second of the smallest-labelled edge is shifted to position [0] of the rotation.
+			secondOption = numpy.roll(permutation, -indicesOfSmallestEdgeLabel[1]).tolist()
+			# Of these two, we choose the one that comes first lexicographically. 
+			if firstOption <= secondOption:
+				standardRepresentative = firstOption
+			else:
+				standardRepresentative = secondOption
+		# (3) Check to see whether that standard representative has already been stored in rotationsToReturn. If it's not, append it.
+		if not [a for (a,b) in permutation] in [[a for (a,b) in rotation] for rotation in rotationsToReturn]:
+			rotationsToReturn.append(standardRepresentative)
+	return rotationsToReturn
 
 def main():
 	global g
