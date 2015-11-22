@@ -26,7 +26,6 @@
 	#Search for 'TODO's
 	#Leave 'REMOVE's inline with temporary code so I can clean up easily.
 	#META TODO's:
-				# getBoundaryComponenets(rotationSystem) (implement boundary walk algo.)
 				# isTwoSided(rotationSystem)
 				# debug.
 				# (optional) write unit tests.
@@ -172,17 +171,83 @@ def isTwoSided(rotationSystem):
 def SatisfiesTheorem4(rotationSystem,candidateGraph):
 	global g
 	## Check whether g >= (E-V+n)/2 - 1.
-	n = len(getBoundaryComponenets(rotationSystem)) # Number of boundary components
+	n = len(getBoundaryComponents(rotationSystem)) # Number of boundary components
 	E = candidateGraph.ecount()	# Number of edges 
 	V = candidateGraph.vcount()	# Number of vertices
 	if g >= (E-V+n)/2 - 1:
 		return True
 	return False
 
-def getBoundaryComponenets(rotationSystem):
- 	#TODO
+def getBoundaryComponents(rotationSystem):
  	# Goal: Apply the boundary-walk algorithm and return a list of boundary components for the reduced band decomposition corresponding to rotationSystem.
- 	return
+ 	boundaryComponents = []
+ 	## (1) First list, for each vertex v, all the edge-end-connections at that vertex in edgeEndConnectionsAt[v].
+ 	edgeEndConnectionsAt = [[] for x in rotationSystem]
+ 	for v in range(len(rotationSystem)):
+ 		#Create list of edgeEndConnections[v] at each vertex. # TODO: create an image exaplining this in the README.md
+ 		for connection in range(len(rotationSystem[v])):
+ 			# NOTE: The boolean False will be changed to True later on, after this edgeEndConnection is traversed in the boundaryWalk algorithm.
+ 			edgeEndConnectionsAt[v].append([rotationSystem[v][connection],rotationSystem[v][(connection+1)%len(rotationSystem[v])],False])
+ 	## (2) Perform the boundaryWalk algorithm until all edge-end-connections have been traversed.
+ 	while (not all([all([c for [a,b,c] in edgeEndConnectionsAt[x]]) for x in range(len(edgeEndConnectionsAt))])): # This loops until all edge-end connections have been marked 'True'.
+ 		# Find the first edge-end connection that hasn't been traversed yet (that is, the first edge-end connection that is still marked False).
+ 		# Check each vertex one at a time, looking for an edge-end-connection that is marked false.
+ 		for v in range(len(rotationSystem)):
+ 			# Check if there is an edge-end-connection still marked False.
+ 			if False in [c for [a,b,c] in edgeEndConnectionsAt[v]]:
+ 				# If so then let edgeEndConnection be the first one.
+ 				edgeEndConnection = edgeEndConnectionsAt[v][[c for [a,b,c] in edgeEndConnectionsAt[v]].index(False)]
+ 				break
+ 		# Perform the boundaryWalk algorithm starting with this edge-end-connection and store the traversed edge-end-connections.
+ 		boundaryComponent = boundaryWalk(edgeEndConnection, edgeEndConnectionsAt)
+ 		# Append this new boundary component to the list of BoundaryComponents.
+ 		boundaryComponents.append(boundaryComponent)
+ 	return boundaryComponents
+
+def boundaryWalk(inputEdgeEndConnection, edgeEndConnectionsAt):
+	# Goal: Perform the boundary walk algorithm begining at inputEdgeEndConnection. Mark the edge-end connections traversed True.
+	# Goal: Return the boundaryComponent as a list of all edges traversed.
+	# Begin with edgeEndConnection.
+	traversedEdgeEndConnections = []
+	currentEdgeEndConnection = inputEdgeEndConnection
+
+	traversedEdgeEndConnections.append(currentEdgeEndConnection)
+	outgoingEdgeEnd = currentEdgeEndConnection[1]
+	nextIncomingEdgeEnd = [outgoingEdgeEnd[0],(outgoingEdgeEnd[1]+1)%2]
+	# Find the edgeEndConnection that has nextIncomingEdgeEnd as it's incoming edge-end. We'll search one vertex at a time.
+	for v in range(len(edgeEndConnectionsAt)):
+		if nextIncomingEdgeEnd in [a for [a,b,c] in edgeEndConnectionsAt[v]]:
+			index = [a for [a,b,c] in edgeEndConnectionsAt[v]].index(nextIncomingEdgeEnd)
+			# Make that edgeEndConnection the new currentEdgeEndConnection.
+			currentEdgeEndConnection = edgeEndConnectionsAt[v][index]
+			break
+	# Repeat until we end up back at the inputEdgeEndConnection.
+	while currentEdgeEndConnection is not inputEdgeEndConnection:
+		traversedEdgeEndConnections.append(currentEdgeEndConnection)
+		outgoingEdgeEnd = currentEdgeEndConnection[1]
+		nextIncomingEdgeEnd = [outgoingEdgeEnd[0],(outgoingEdgeEnd[1]+1)%2]
+		# Find the edgeEndConnection that has nextIncomingEdgeEnd as it's incoming edge-end. We'll search one vertex at a time.
+		for v in range(len(edgeEndConnectionsAt)):
+			if nextIncomingEdgeEnd in [a for [a,b,c] in edgeEndConnectionsAt[v]]:
+				index = [a for [a,b,c] in edgeEndConnectionsAt[v]].index(nextIncomingEdgeEnd)
+				# Make that edgeEndConnection the new currentEdgeEndConnection.
+				currentEdgeEndConnection = edgeEndConnectionsAt[v][index]
+				break
+	# Store the set of edges traversed in the variable named boundaryComponent.
+	edgesTraversed = []
+	for connection in traversedEdgeEndConnections:
+		edgesTraversed += [connection[0][0], connection[1][0]]
+	# Remove duplicate edges from the list edgesTraversed.
+	boundaryComponent = list(set(edgesTraversed))
+	#  For each edge-end-connection that was traversed, mark that connection True in edgeEndConnections.
+	for connection in traversedEdgeEndConnections:
+		# Find that connection in edgeEndConnectionsAt. We'll search one vertex at a time.
+		for v in range(len(edgeEndConnectionsAt)):
+			if connection in edgeEndConnectionsAt[v]:
+				indexOfTraversedEdgeEnd = edgeEndConnectionsAt[v].index(connection)
+				edgeEndConnectionsAt[v][indexOfTraversedEdgeEnd][2] = True
+				break
+	return boundaryComponent
 
 def generateAllRotationSystemsOn(candidateGraph):
 	# Goal: Generate all rotation systems on candidateGraph.
@@ -191,15 +256,16 @@ def generateAllRotationSystemsOn(candidateGraph):
 							# NOTE: Edges are labeled by thier index in candidateGraph.get_edgelist(). 
 							# NOTE: For example, edge '4' refers to candidateGraph.get_edgelist()[4].
 	for v in range(0, len(candidateGraph.vs())):
-		edgeEndsIncidentToV = [(edgeIndex, 0) for edgeIndex, (edgeEndZero, edgeEndOne) in enumerate(candidateGraph.get_edgelist()) if edgeEndZero==v]
-		edgeEndsIncidentToV += [(edgeIndex, 1) for edgeIndex, (edgeEndZero, edgeEndOne) in enumerate(candidateGraph.get_edgelist()) if edgeEndOne==v]
+		edgeEndsIncidentToV = [[edgeIndex, 0] for edgeIndex, (edgeEndZero, edgeEndOne) in enumerate(candidateGraph.get_edgelist()) if edgeEndZero==v]
+		edgeEndsIncidentToV += [[edgeIndex, 1] for edgeIndex, (edgeEndZero, edgeEndOne) in enumerate(candidateGraph.get_edgelist()) if edgeEndOne==v]
 		incidentEdgeEnds.insert(v, edgeEndsIncidentToV)
 		# NOTE: Edges are stored in candidateGraph.get_edgelist() as ordered pairs (a,b). We refer to 'a' and 'b' as 'edgeEndZero' and 'edgeEndOne', respectively.
 	## (2) For each vertex, v, generate a list of all possible rotations at v. Store this list at allPossibleRotationsAt[v].
 	# Initiate empty list.
 	allPossibleRotationsAt = []
+
 	for v in range(0,len(candidateGraph.vs())):
-		allPossibleRotationsAt.insert(v, rotationsUpToCyclicPermutation(incidentEdgeEnds(v)))
+		allPossibleRotationsAt.insert(v, rotationsUpToCyclicPermutation(incidentEdgeEnds[v]))
 	## (3) Generate all rotation systems on candidateGraph.
 	listOfRotationOptions = [allPossibleRotationsAt[v] for v in range(0, len(candidateGraph.vs()))]
 	allRotationSystems = [list(rotationSystem) for rotationSystem in itertools.product(*listOfRotationOptions)]
@@ -235,7 +301,6 @@ def rotationsUpToCyclicPermutation(listOfEdgeEnds):
 			rotationsToReturn.append(standardRepresentative)
 	else: # Then both edge-ends of the smallest-labelled edge appear at this vertex.
 		# Identify which of the smallest-labelled edge ends is edgeEndZero.
-		print "\n\n Running correct algo for multiple smallest edge ends." # REMOVE
 		if listOfEdgeEnds[indicesOfSmallestEdgeLabel[0]][1] == 0:
 			indexOfSmallestEdgeEnd = indicesOfSmallestEdgeLabel[0]
 		else:
@@ -247,7 +312,7 @@ def rotationsUpToCyclicPermutation(listOfEdgeEnds):
 		allPermutations = itertools.permutations(listOfEdgeEndsWithoutSmallest)
 		# Attach smallestLbelledEdge to the begining of each of these permutations.
 		for permutation in allPermutations:
-			# There are two possible representatives for the rotation associated with this permutation.
+			# There are two options for representatives of the rotation associated with this permutation.
 			# Option1 is just the smallestLabelledEdge followed by the rest of the edges in the permutation.
 			option1 = list(permutation)
 			option1.insert(0, smallestLabelledEdge)
@@ -255,7 +320,7 @@ def rotationsUpToCyclicPermutation(listOfEdgeEnds):
 			# option2 is option1 shifted so that the other edge-end of smallest-labelled edge appears in the first position of the rotation.
 			option2 = list(permutation)
 			option2.insert(0, smallestLabelledEdge)
-			indexOfOtherEnd = option2.index((smallestEdgeLabel,1))
+			indexOfOtherEnd = option2.index([smallestEdgeLabel,1])
 			option2 = numpy.roll(option2, -indexOfOtherEnd, 0).tolist()
 			# Now choose which of the two options is lexicographically smaller (considering only the first entry of each tuple).
 			if [a for [a,b] in option1] <= [a for [a,b] in option2]:
