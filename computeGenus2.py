@@ -26,7 +26,6 @@
 	#Search for 'TODO's
 	#Leave 'REMOVE's inline with temporary code so I can clean up easily.
 	#META TODO's:
-				# isTwoSided(rotationSystem)
 				# debug.
 				# (optional) write unit tests.
 
@@ -160,13 +159,32 @@ def thereExistsAMinimalSeparatingEmbeddingOf(candidateGraph):
 	rotationSystems = generateAllRotationSystemsOn(candidateGraph)
 	## (2) Check whether any of them have a minimal separating embedding into a surface of genus 2.
 	for rotationSystem in rotationSystems:
-		if isTwoSided(rotationSystem) and SatisfiesTheorem4(rotationSystem,candidateGraph):
+		if isTwoSided(rotationSystem, candidateGraph) and SatisfiesTheorem4(rotationSystem,candidateGraph):
 			return True
 	return False
 
-def isTwoSided(rotationSystem):
-	#TODO
-	return
+def isTwoSided(rotationSystem, candidateGraph):
+	# Goal: Return True is rotationSystem is two-sided, and return False otherwise.
+	# Get the number of edges in the graph.
+	numOfEdges = len(list(candidateGraph.es()))
+	# Get the list of boundary components of the reduced band decomposition corresponding to rotationSystem.
+	boundaryComponents = getBoundaryComponents(rotationSystem)
+	# Consider every possible partition of the boundary components into two cells (which we'll call 'black' and 'white').
+	partitions = list(itertools.permutations(list(itertools.combinations_with_replacement(['black','white'],len(boundaryComponents)))))
+	blackList=[]
+	whiteList=[]
+	# Each partition assigns every boundary component to either blackList or whiteList.
+	for partition in partitions:
+		for componentNumber in range(len(boundaryComponents)):
+			if partition[componentNumber] == 'black':
+				blackList+=boundaryComponents[componentNumber]
+			else: 
+				whiteList+=boundaryComponents[componentNumber]
+		# Check to see if each edge of candidateGraph appears in both the blackList and the White list.
+		if all([((edge in blackList) and (edge in whiteList)) for edge in range(numOfEdges)]):
+			# If so, then the rotationSystem is two-sided.
+			return True
+	return False
 
 def SatisfiesTheorem4(rotationSystem,candidateGraph):
 	global g
@@ -184,7 +202,7 @@ def getBoundaryComponents(rotationSystem):
  	## (1) First list, for each vertex v, all the edge-end-connections at that vertex in edgeEndConnectionsAt[v].
  	edgeEndConnectionsAt = [[] for x in rotationSystem]
  	for v in range(len(rotationSystem)):
- 		#Create list of edgeEndConnections[v] at each vertex. # TODO: create an image exaplining this in the README.md
+ 		#Create list of edgeEndConnections[v] at each vertex.
  		for connection in range(len(rotationSystem[v])):
  			# NOTE: The boolean False will be changed to True later on, after this edgeEndConnection is traversed in the boundaryWalk algorithm.
  			edgeEndConnectionsAt[v].append([rotationSystem[v][connection],rotationSystem[v][(connection+1)%len(rotationSystem[v])],False])
@@ -202,6 +220,7 @@ def getBoundaryComponents(rotationSystem):
  		boundaryComponent = boundaryWalk(edgeEndConnection, edgeEndConnectionsAt)
  		# Append this new boundary component to the list of BoundaryComponents.
  		boundaryComponents.append(boundaryComponent)
+ 	# TODO: Create an explaination with images exaplaining how the boundary walk algorithm works in the README.md.
  	return boundaryComponents
 
 def boundaryWalk(inputEdgeEndConnection, edgeEndConnectionsAt):
