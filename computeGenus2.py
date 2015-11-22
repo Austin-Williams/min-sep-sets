@@ -32,8 +32,14 @@
 import igraph
 import itertools
 import numpy
+import logging
+
+# Using basic logger configuration.
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 def generateCandidateGraphs():
+	logger.info('Generating candidate graphs.')
 	global g
 	C_g = []
 	temp = [] # Used to hold discovered candiate graphs until checking for and removing isomorphic copies.
@@ -60,6 +66,8 @@ def generateCandidateGraphs():
 					temp.append(graph.copy()) # Store this candidate graph in the list named 'temp'.
 	## (2) Remove any isomorphic duplicates.
 		C_g = removeIsomorphicCopies(temp)
+	logger.info('Completed generation of candidtate graphs.')
+	logger.debug('Total number of candidate graphs: %s.', len(C_g))
 	return C_g
 
 def removeIsomorphicCopies(temp):
@@ -123,6 +131,7 @@ def hasNoVertexOfOddDegree(graph):
 	return numOfVerticesWithOddDegree == 0
 
 def generateAllGraphs(V, E):
+	debugTest = ''
 	# Goal: Return a list of all graphs on V vertices with E edges.
 	allGraphs=[]
 	# IMPORTANT: DO NOT return any graphs with isolated vertices!
@@ -133,34 +142,54 @@ def generateAllGraphs(V, E):
 	## (3) For each choice in allPossibleWaysOfChoosingTheEdges, create a graph on V vertices with those edge choices.
 	for choice in allPossibleWaysOfChoosingTheEdges:
 		# Create a graph, g, with with V vertices and the chosen edges.
-		g = igraph.Graph(V)
-		g.add_edges(list(choice))
+		newGraph = igraph.Graph(V)
+		newGraph.add_edges(list(choice))
 		# If the resulting graph does not contain any isolated vertices then store it.
-		if g.degree().count(0) == 0:
-			allGraphs.append(g)
+		if newGraph.degree().count(0) == 0:
+			allGraphs.append(newGraph)
+			del newGraph
+
+	# TODO add the single isolated loop to this list if needed. Alternatiecly, we could add it at the end.
 	return allGraphs
 
 def findMinimalSeparatingGraphsIn(C_g):
+	logger.info('Searching through C_g for minimal separating graphs.')
 	# The input C_g is a list of candidate graphs.
 	# Goal: Check each graph in C_g to see if it has a minimal separating embedding in a surface of genus g.
 	G_g = []
 	for candidateGraph in C_g:
+		logger.debug('\n Checking graph with edge list %s', candidateGraph.get_edgelist())
 		if thereExistsAMinimalSeparatingEmbeddingOf(candidateGraph):
+			logger.debug('Found a minimal separating embedding')
 			G_g.append(candidateGraph)
 	return G_g
 
 def reportResults(G_g):
 	#TODO
+	logger.info('G_g is %s', G_g)
+	for graph in G_g: #REMOVE 
+		print graph.get_edgelist()  #REMOVE 
+	logger.info('G_g has size %s', len(G_g))
 	return
 
 def thereExistsAMinimalSeparatingEmbeddingOf(candidateGraph):
+	global g
+	logger.debug('Searching rotation systems on this graph for minsep embeddings')
 	# Description: Returns True if and only if there exists a minimal separating embedding of candidateGraph into a genus 2 surface.
 	## (1) Generate all rotation systems on candidateGraph.
 	rotationSystems = generateAllRotationSystemsOn(candidateGraph)
+	logger.debug('Number of rotation systems on this graph: %s ', len(rotationSystems))
 	## (2) Check whether any of them have a minimal separating embedding into a surface of genus 2.
 	for rotationSystem in rotationSystems:
-		if isTwoSided(rotationSystem, candidateGraph) and SatisfiesTheorem4(rotationSystem,candidateGraph):
-			return True
+		if satisfiesTheorem4(rotationSystem,candidateGraph):
+			if isTwoSided(rotationSystem, candidateGraph):
+				logger.debug('Found a rotation system that is both two-sided and satisfiestheorem 4')
+				return True
+			else:
+				logger.debug('DID NOT find a two-sided rotation system')
+		else:
+			logger.debug('DOES NOT satisfy Theorem4')
+	logger.debug('This graph DOES NOT have a minimal separating embedding in genus %s \n\n', g)
 	return False
 
 def isTwoSided(rotationSystem, candidateGraph):
@@ -170,29 +199,33 @@ def isTwoSided(rotationSystem, candidateGraph):
 	# Get the list of boundary components of the reduced band decomposition corresponding to rotationSystem.
 	boundaryComponents = getBoundaryComponents(rotationSystem)
 	# Consider every possible partition of the boundary components into two cells (which we'll call 'black' and 'white').
-	partitions = list(itertools.permutations(list(itertools.combinations_with_replacement(['black','white'],len(boundaryComponents)))))
-	blackList=[]
-	whiteList=[]
+	partitionTypes = list(itertools.combinations_with_replacement(['black','white'],len(boundaryComponents)))
 	# Each partition assigns every boundary component to either blackList or whiteList.
-	for partition in partitions:
-		for componentNumber in range(len(boundaryComponents)):
-			if partition[componentNumber] == 'black':
-				blackList+=boundaryComponents[componentNumber]
-			else: 
-				whiteList+=boundaryComponents[componentNumber]
-		# Check to see if each edge of candidateGraph appears in both the blackList and the White list.
-		if all([((edge in blackList) and (edge in whiteList)) for edge in range(numOfEdges)]):
-			# If so, then the rotationSystem is two-sided.
-			return True
+	for partType in partitionTypes:
+		partitions = list(itertools.permutations(partType))
+		for partition in partitions:
+			blackList=[]
+			whiteList=[]
+			for componentNumber in range(len(boundaryComponents)):
+				if partition[componentNumber] == 'black':
+					blackList+=boundaryComponents[componentNumber]
+				else: 
+					whiteList+=boundaryComponents[componentNumber]
+			# Check to see if each edge of candidateGraph appears in both the blackList and the White list.
+			if all([((edge in blackList) and (edge in whiteList)) for edge in range(numOfEdges)]):
+				# If so, then the rotationSystem is two-sided.
+				logger.debug('Found a two-sided rotation system')
+				return True
 	return False
 
-def SatisfiesTheorem4(rotationSystem,candidateGraph):
+def satisfiesTheorem4(rotationSystem,candidateGraph):
 	global g
 	## Check whether g >= (E-V+n)/2 - 1.
 	n = len(getBoundaryComponents(rotationSystem)) # Number of boundary components
 	E = candidateGraph.ecount()	# Number of edges 
 	V = candidateGraph.vcount()	# Number of vertices
 	if g >= (E-V+n)/2 - 1:
+		logger.debug('satisfies Theorem4')
 		return True
 	return False
 
@@ -354,6 +387,7 @@ def rotationsUpToCyclicPermutation(listOfEdgeEnds):
 def main():
 	global g
 	g = 2 # Note: g must be greater than 0.
+	logger.info('Initiating search for minimal separating graphs in surfaces of genus %s', g)
 	## (1) Generate the finite set, C_g, of candidate graphs for genus g.
 	C_g = generateCandidateGraphs()
 	## (2) Check each graph in C_g to determine whether or not it has a minimal separating embedding in a surface of genus g.
