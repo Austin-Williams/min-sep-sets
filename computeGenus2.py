@@ -65,7 +65,7 @@ def generateCandidateGraphs():
 				if hasNoVertexOfOddDegree(graph) and allDegreeTwoVerticesAreBoomerangs(graph) and atMostGPlusOneBoomerangs(graph):
 					temp.append(graph.copy()) # Store this candidate graph in the list named 'temp'.
 	## (2) Remove any isomorphic duplicates.
-		C_g = removeIsomorphicCopies(temp)
+	C_g = removeIsomorphicCopies(temp)
 	logger.info('Completed generation of candidtate graphs.')
 	logger.debug('Total number of candidate graphs: %s.', len(C_g))
 	return C_g
@@ -76,7 +76,8 @@ def removeIsomorphicCopies(temp):
 		# Pop the first graph from temp and insert it at the begining of C_g.
 		C_g.insert(0, temp.pop(0))
 		# Remove from temp all graphs isomorphic to C_g[0].
-		temp = [x for x in temp if not C_g[0].isomorphic(x)]
+		temp = [x for x in temp if not C_g[0].isomorphic_vf2(x)]
+	C_g.reverse()
 	return C_g
 
 def atMostGPlusOneBoomerangs(graph):
@@ -131,7 +132,6 @@ def hasNoVertexOfOddDegree(graph):
 	return numOfVerticesWithOddDegree == 0
 
 def generateAllGraphs(V, E):
-	debugTest = ''
 	# Goal: Return a list of all graphs on V vertices with E edges.
 	allGraphs=[]
 	# IMPORTANT: DO NOT return any graphs with isolated vertices!
