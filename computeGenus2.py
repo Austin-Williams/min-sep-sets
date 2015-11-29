@@ -314,6 +314,7 @@ def generateAllRotationSystemsOn(candidateGraph):
 		# NOTE: Edges are stored in candidateGraph.get_edgelist() as ordered pairs (a,b). We refer to 'a' and 'b' as 'edgeEndZero' and 'edgeEndOne', respectively.
 	## (2) For each vertex, v, generate a list of all possible rotations at v. Store this list at allPossibleRotationsAt[v].
 	# Initiate empty list.
+
 	allPossibleRotationsAt = []
 
 	for v in range(0,len(candidateGraph.vs())):
@@ -324,9 +325,47 @@ def generateAllRotationSystemsOn(candidateGraph):
 	# Return the list.
 	return allRotationSystems
 
+def allLoopsOptimisation(R_B, P, rotationsToReturn):
+	# TODO : leave goal for this.
+	if len(P) == 0:
+		rotationsToReturn.append(R_B)
+		return
+	# Else there are edges to place.
+	Pcopy = list(P)
+	e_lowest = min(Pcopy)
+	Pcopy.remove(e_lowest)
+	R_Bcopy = list(R_B)
+	R_Bcopy[R_Bcopy.index([])] = e_lowest
+	## Place the other end of e_lowest.
+	e_lowestOtherEnd = [e_lowest[0], e_lowest[1]+1%2]
+	Pcopy.remove(e_lowestOtherEnd)
+	# List indices of the unfilled slots in R_B
+	indicies = [i for i,j in enumerate(R_Bcopy) if j ==[]]
+	for index in indicies:
+		R_BcopyCopy = list(R_Bcopy)
+		R_BcopyCopy[index]=e_lowestOtherEnd
+		allLoopsOptimisation(R_BcopyCopy, Pcopy, rotationsToReturn)
+		del R_BcopyCopy
+	del R_Bcopy
+	del Pcopy
+	return
+
 def rotationsUpToCyclicPermutation(listOfEdgeEnds):
 	# Goal: Return a list of all rotations of listOfEdgeEnds -- unique up to cyclic permutations.
 	rotationsToReturn = []
+	## If listOfEdgeEnds consists entirely of loops, then we have a special optimisation that we can use.
+	allEdgesAreLoops = True
+	logger.debug("listOfEdgeEnds is %s \n\n", listOfEdgeEnds)
+	for edgeEnd in listOfEdgeEnds:
+		logger.debug('edgeEnd is %s \n\n', edgeEnd)
+		if [edgeEnd[0], (edgeEnd[1]+1)%2] not in listOfEdgeEnds:
+			allEdgesAreLoops = False
+			break
+	if allEdgesAreLoops:
+		P = list(listOfEdgeEnds)
+		R_B = [[] for n in range(0,len(P))]
+		allLoopsOptimisation(R_B, P, rotationsToReturn)
+		return rotationsToReturn
 	# NOTE: Naively, we could simply return [x for x in itertools.permutations(listOfEdgeEnds)], and everything would work fine.
 	# NOTE: While that would make code-verification easier, doing so results in burdensome runtime of the overall program.
 	# NOTE: As a result, this is one area where I think the speedups are worth the increased code complexity.
