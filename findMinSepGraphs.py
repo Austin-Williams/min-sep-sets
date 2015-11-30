@@ -22,6 +22,8 @@
 
 # ================================================================================
 
+# This program is an implementation of an algorithm designed by Austin Williams and J.J.P. Veerman.
+
 import igraph
 import itertools
 import numpy
