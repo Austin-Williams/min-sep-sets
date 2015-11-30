@@ -65,7 +65,7 @@ When you are finished running the program, deactivate the virtual environment:
 
 Then delete the virtual envirnoment by delting its folder:
 
-`rm -rf envname`
+`$ rm -rf envname`
 
 Done!
 
