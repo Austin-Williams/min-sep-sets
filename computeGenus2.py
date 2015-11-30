@@ -22,13 +22,6 @@
 
 # ================================================================================
 
-#Dev Notes:
-	#Search for 'TODO's
-	#Leave 'REMOVE's inline with temporary code so I can clean up easily.
-	#META TODO's:
-				# debug.
-				# (optional) write unit tests.
-
 import igraph
 import itertools
 import numpy
@@ -46,7 +39,7 @@ def generateCandidateGraphs():
 	temp = [] # Used to hold discovered candiate graphs until checking for and removing isomorphic copies.
 	## (1) Find all graphs G for which:
 	#		1a. V <= 2g.
-	#		1b. V <= E <= 2g + V  #REMOVE - change back to 0 < E <= 2g + V.
+	#		1b. V <= E <= 2g + V  #NOTE - this is optimized from 0 < E <= 2g + V.
 	#		1c. G has no vertex of odd degree.
 	#		1d. The only vertices of G with degree two are boomerangs.
 	#		1e. G has at most g+1 boomerangs.
@@ -54,7 +47,7 @@ def generateCandidateGraphs():
 	# 1a. V <= 2g
 	for V in range(1, 2*g+1):
 		# 1b. V <= E <= 2g + V.
-		for E in range(V, 2*g+V+1): #REMOVE - change back to 0 < E <= 2g + V.
+		for E in range(V, 2*g+V+1): #NOTE - this is optimized from 0 < E <= 2g + V.
 			# Generate all graphs with V vertices and E edges.
 			allGraphs = generateAllGraphs(V, E)
 			# Check each of these graphs for properties 1c, 1d, and 1e.
@@ -158,9 +151,6 @@ def generateAllGraphs(V, E):
 		if newGraph.degree().count(0) == 0:
 			allGraphs.append(newGraph)
 			del newGraph
-
-	# TODO add the single isolated loop to this list if needed. Alternatiecly, we could add it at the end.
-
 	return allGraphs
 
 def findMinimalSeparatingGraphsIn(C_g):
@@ -171,23 +161,53 @@ def findMinimalSeparatingGraphsIn(C_g):
 	for candidateGraph in C_g:
 		logger.info('Checking candidate graph number %s of %s. [%s percent complete]', C_g.index(candidateGraph)+1, len(C_g), round(100*(C_g.index(candidateGraph)+1)/len(C_g)) )
 		logger.debug('\n Checking graph with edge list %s', candidateGraph.get_edgelist())
-		if thereExistsAMinimalSeparatingEmbeddingOf(candidateGraph):
+		existsAMinSepEmbedding = thereExistsAMinimalSeparatingEmbeddingOf(candidateGraph)
+		if existsAMinSepEmbedding[0]:
 			logger.debug('Found a minimal separating embedding')
-			G_g.append(candidateGraph)
+			G_g.append([candidateGraph,existsAMinSepEmbedding[1]])
 	return G_g
 
 def reportResults(G_g):
-	#TODO
-	for graph in G_g: #REMOVE 
-		print graph.get_edgelist()  #REMOVE 
-	logger.info('G_g has size %s', len(G_g))
+	# Goal: This function simply displays the results to the command line and stores the results to G_g.txt.
+	# NOTE: In order to make the command-line display of the results easier on the eye, we use 'print' instead of 'logger'.
+	global g
+	textToSave = ""
+	textToSave += '================================================================================================== \n\n'
+	textToSave += 'Computation complete. All minimal separating graphs have been found for genus ' + str(g) + '. Results are displayed below.\n\n'
+	textToSave += 'There are a total of ' + str(len(G_g)) + ' minimal separating graphs for genus ' + str(g) + '. The graphs are listed below.'
+	print textToSave
+	for result in G_g:
+		graph = result[0]
+		rotationSystem = result[1]
+		n = len(getBoundaryComponents(rotationSystem)) # Number of boundary components
+		E = graph.ecount()	# Number of edges 
+		V = graph.vcount()	# Number of vertices
+		textToDisplay = ""  # This will be displayed to the command line and stored to a file.
+		textToDisplay += '\n\n--------------------------------------------------------------------------------------------------\n'
+		textToDisplay += 'GRAPH NUMBER: ' + str([x for [x,y] in G_g].index(graph)) + '\n'
+		textToDisplay += 'Number of Vertices: ' + str(V) + '\n'
+		textToDisplay += 'Number of Edges: ' + str(E) + '\n'
+		textToDisplay += 'Edge set: ' + str(graph.get_edgelist()) + '\n'
+		textToDisplay += 'The following rotation system describes a minimal separating embedding of the graph into a surface of genus ' + str(((E-V+n)/2 - 1)) + '\n'
+		for vertex in range(len(rotationSystem)):
+			textToDisplay += "vertex " + str(vertex) + " : "
+			for edge in rotationSystem[vertex]:
+				textToDisplay += str(edge[0]) + " "
+			textToDisplay += "\n"
+		print textToDisplay
+		textToSave += textToDisplay
+	f = open( 'G_'+str(g)+'.txt', 'w' )
+	f.write( textToSave )
+	f.close()
+	print'\n\n--------------------------------------------------------------------------------------------------\n'
+	logger.info('The minimal separating graphs for genus %s have been stored in the textfile named "G_'+str(g)+'.txt"', g)
 	return
 
 
 def thereExistsAMinimalSeparatingEmbeddingOf(candidateGraph):
 	global g
 	logger.debug('Searching rotation systems on this graph for minsep embeddings')
-	# Description: Returns True if and only if there exists a minimal separating embedding of candidateGraph into a genus 2 surface.
+	# Description: Returns [True, RotationSystem] if and only if there exists a minimal separating embedding of candidateGraph into a genus 2 surface, where RotationSystem corresponds to such a minimal separating embedding.
 	## (1) Generate all rotation systems on candidateGraph.
 	rotationSystems = generateAllRotationSystemsOn(candidateGraph)
 	logger.debug('Number of rotation systems on this graph: %s ', len(rotationSystems))
@@ -196,13 +216,13 @@ def thereExistsAMinimalSeparatingEmbeddingOf(candidateGraph):
 		if satisfiesTheorem4(rotationSystem,candidateGraph):
 			if isTwoSided(rotationSystem, candidateGraph):
 				logger.debug('Found a rotation system that is both two-sided and satisfiestheorem 4')
-				return True
+				return [True,rotationSystem]
 			else:
 				logger.debug('DID NOT find a two-sided rotation system')
 		else:
 			logger.debug('DOES NOT satisfy Theorem4')
 	logger.debug('This graph DOES NOT have a minimal separating embedding in genus %s \n\n', g)
-	return False
+	return [False]
 
 def isTwoSided(rotationSystem, candidateGraph):
 	# Goal: Return True is rotationSystem is two-sided, and return False otherwise.
@@ -265,7 +285,6 @@ def getBoundaryComponents(rotationSystem):
  		boundaryComponent = boundaryWalk(edgeEndConnection, edgeEndConnectionsAt)
  		# Append this new boundary component to the list of BoundaryComponents.
  		boundaryComponents.append(boundaryComponent)
- 	# TODO: Create an explaination with images exaplaining how the boundary walk algorithm works in the README.md.
  	return boundaryComponents
 
 def boundaryWalk(inputEdgeEndConnection, edgeEndConnectionsAt):
@@ -338,7 +357,9 @@ def generateAllRotationSystemsOn(candidateGraph):
 	return allRotationSystems
 
 def allLoopsOptimisation(R_B, P, rotationsToReturn):
-	# TODO : leave goal for this.
+	# Goal: This function returns the set of rotations at a vertex when every edge incident to the vertex is a loop.
+	# When every edge incident to a vertex is a loop we can greatly reduce the time it takes to list every rotation at that vertex.
+	# This function returns all rotations (up to cyclic permutations and relabelling of the edges).
 	if len(P) == 0:
 		rotationsToReturn.append(R_B)
 		return
@@ -445,6 +466,7 @@ def main():
 	G_g = findMinimalSeparatingGraphsIn(C_g)
 	## (3) Log and display the results.
 	reportResults(G_g)
+	logger.info('Program finished running successfully.')
 	return
 
 if __name__ == '__main__':
