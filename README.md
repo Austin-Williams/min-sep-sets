@@ -71,3 +71,13 @@ Then delete the virtual envirnoment by delting its folder:
 `rm -rf envname`
 
 Done!
+
+## Computing Minimal Separating Graphs for a Genus other than 2
+The program is written for arbitrary genus g. The global variable, g, declared in the *main()* function determines the genus of the surface for whose minimal separating graphs this program searches. It is set to `g = 2` by default.
+
+To find the minimal separating graphs for genus 1, for example, simply set `g =  1` in the *main()* function in *findMinSepGraphs.py*. Be aware, though, that the time this program takes to run is superexponential in g. So anything beyond genus 3 may be unrealistic without big-O improvements to the underlying algorithm.
+
+## A note on the programming style
+This program is an implementation of an algorithm that can be found in a formal mathematics paper being submitted for peer-review.  As a result, this program is written with the intention of being *easy to verify*. It is *not* written for *optimal efficiency*. Whenever a choice between clarity and efficiency must be made, we always err on the side of clarity and ease of verification over space- or time-complexity. 
+
+There is a single exception to this rule. The algorithm calls for the program to, given a graph, list all possible rotation sytems on that graph. Implemented naively, this could result in a runtime of several days for genus `g = 2`. By allowing ourselves to optimize this function (by not listing rotation systems that are equivalent to ones we've already listed), we are able to reduce the runtime for genus `g = 2` to less than a few minutes. Although the correctness of the naive implementation would be esier to verify, we think the trade-off between clarity and efficiency is worthwhile in this case.
