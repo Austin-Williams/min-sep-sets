@@ -1,0 +1,272 @@
+================================================================================================== 
+
+Computation complete. All minimal separating graphs have been found for genus 2. Results are displayed below.
+
+There are a total of 26 minimal separating graphs for genus 2. The graphs are listed below.
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 0
+Number of Vertices: 1
+Number of Edges: 1
+Edge set: [(0, 0)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 0
+vertex 0 : 0 0 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 1
+Number of Vertices: 1
+Number of Edges: 2
+Edge set: [(0, 0), (0, 0)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 1
+vertex 0 : 0 0 1 1 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 2
+Number of Vertices: 1
+Number of Edges: 3
+Edge set: [(0, 0), (0, 0), (0, 0)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 0 1 1 2 2 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 3
+Number of Vertices: 1
+Number of Edges: 4
+Edge set: [(0, 0), (0, 0), (0, 0), (0, 0)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 0 1 2 3 1 2 3 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 4
+Number of Vertices: 1
+Number of Edges: 5
+Edge set: [(0, 0), (0, 0), (0, 0), (0, 0), (0, 0)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 1 2 0 1 3 4 2 3 4 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 5
+Number of Vertices: 2
+Number of Edges: 2
+Edge set: [(0, 0), (1, 1)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 1
+vertex 0 : 0 0 
+vertex 1 : 1 1 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 6
+Number of Vertices: 2
+Number of Edges: 3
+Edge set: [(0, 0), (1, 1), (1, 1)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 0 
+vertex 1 : 1 1 2 2 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 7
+Number of Vertices: 2
+Number of Edges: 4
+Edge set: [(0, 1), (0, 1), (0, 1), (0, 1)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 1
+vertex 0 : 0 1 2 3 
+vertex 1 : 0 1 2 3 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 8
+Number of Vertices: 2
+Number of Edges: 4
+Edge set: [(0, 0), (1, 1), (1, 1), (1, 1)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 0 
+vertex 1 : 1 2 3 1 2 3 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 9
+Number of Vertices: 2
+Number of Edges: 4
+Edge set: [(0, 0), (0, 1), (0, 1), (1, 1)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 0 1 2 
+vertex 1 : 1 3 3 2 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 10
+Number of Vertices: 2
+Number of Edges: 5
+Edge set: [(0, 1), (0, 1), (0, 1), (0, 1), (1, 1)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 1 2 3 
+vertex 1 : 0 4 2 1 4 3 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 11
+Number of Vertices: 2
+Number of Edges: 5
+Edge set: [(0, 0), (0, 1), (0, 1), (1, 1), (1, 1)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 0 1 2 
+vertex 1 : 1 3 4 2 3 4 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 12
+Number of Vertices: 2
+Number of Edges: 6
+Edge set: [(0, 1), (0, 1), (0, 1), (0, 1), (1, 1), (1, 1)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 1 2 3 
+vertex 1 : 0 4 5 1 2 3 4 5 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 13
+Number of Vertices: 2
+Number of Edges: 6
+Edge set: [(0, 1), (0, 1), (0, 1), (0, 1), (0, 1), (0, 1)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 1 2 3 4 5 
+vertex 1 : 0 1 2 3 4 5 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 14
+Number of Vertices: 2
+Number of Edges: 6
+Edge set: [(0, 0), (0, 1), (0, 1), (0, 1), (0, 1), (1, 1)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 1 2 0 3 4 
+vertex 1 : 1 5 4 2 5 3 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 15
+Number of Vertices: 2
+Number of Edges: 6
+Edge set: [(0, 0), (0, 0), (0, 1), (0, 1), (1, 1), (1, 1)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 1 2 0 1 3 
+vertex 1 : 2 4 5 3 4 5 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 16
+Number of Vertices: 3
+Number of Edges: 3
+Edge set: [(0, 0), (1, 1), (2, 2)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 0 
+vertex 1 : 1 1 
+vertex 2 : 2 2 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 17
+Number of Vertices: 3
+Number of Edges: 5
+Edge set: [(0, 2), (0, 2), (0, 2), (0, 2), (1, 1)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 1 2 3 
+vertex 1 : 4 4 
+vertex 2 : 0 1 2 3 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 18
+Number of Vertices: 3
+Number of Edges: 6
+Edge set: [(0, 1), (0, 2), (0, 2), (0, 2), (1, 1), (1, 2)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 1 2 3 
+vertex 1 : 0 4 4 5 
+vertex 2 : 1 2 3 5 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 19
+Number of Vertices: 3
+Number of Edges: 6
+Edge set: [(0, 1), (0, 1), (0, 2), (0, 2), (1, 2), (1, 2)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 1 2 3 
+vertex 1 : 0 4 5 1 
+vertex 2 : 2 3 4 5 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 20
+Number of Vertices: 3
+Number of Edges: 7
+Edge set: [(0, 1), (0, 2), (0, 2), (0, 2), (1, 2), (1, 2), (1, 2)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 1 2 3 
+vertex 1 : 0 4 5 6 
+vertex 2 : 1 2 3 4 5 6 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 21
+Number of Vertices: 3
+Number of Edges: 7
+Edge set: [(0, 1), (0, 2), (0, 2), (0, 2), (1, 1), (1, 1), (1, 2)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 1 2 3 
+vertex 1 : 0 4 5 6 4 5 
+vertex 2 : 1 2 3 6 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 22
+Number of Vertices: 3
+Number of Edges: 7
+Edge set: [(0, 1), (0, 1), (0, 2), (0, 2), (1, 2), (1, 2), (2, 2)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 1 2 3 
+vertex 1 : 0 1 4 5 
+vertex 2 : 2 6 5 3 6 4 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 23
+Number of Vertices: 4
+Number of Edges: 8
+Edge set: [(0, 2), (0, 3), (0, 3), (0, 3), (1, 2), (1, 2), (1, 2), (1, 3)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 1 2 3 
+vertex 1 : 4 5 6 7 
+vertex 2 : 0 4 5 6 
+vertex 3 : 1 2 3 7 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 24
+Number of Vertices: 4
+Number of Edges: 8
+Edge set: [(0, 2), (0, 2), (0, 3), (0, 3), (1, 2), (1, 2), (1, 3), (1, 3)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 2 1 3 
+vertex 1 : 4 6 5 7 
+vertex 2 : 0 4 1 5 
+vertex 3 : 2 7 3 6 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 25
+Number of Vertices: 4
+Number of Edges: 8
+Edge set: [(0, 1), (0, 2), (0, 3), (0, 3), (1, 2), (1, 2), (1, 3), (2, 3)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 2
+vertex 0 : 0 1 2 3 
+vertex 1 : 0 4 5 6 
+vertex 2 : 1 4 5 7 
+vertex 3 : 2 3 6 7 

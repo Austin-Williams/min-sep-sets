@@ -1,0 +1,51 @@
+================================================================================================== 
+
+Computation complete. All minimal separating graphs have been found for genus 1. Results are displayed below.
+
+There are a total of 5 minimal separating graphs for genus 1. The graphs are listed below.
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 0
+Number of Vertices: 1
+Number of Edges: 1
+Edge set: [(0, 0)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 0
+vertex 0 : 0 0 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 1
+Number of Vertices: 1
+Number of Edges: 2
+Edge set: [(0, 0), (0, 0)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 1
+vertex 0 : 0 0 1 1 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 2
+Number of Vertices: 1
+Number of Edges: 3
+Edge set: [(0, 0), (0, 0), (0, 0)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 1
+vertex 0 : 0 1 2 0 1 2 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 3
+Number of Vertices: 2
+Number of Edges: 2
+Edge set: [(0, 0), (1, 1)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 1
+vertex 0 : 0 0 
+vertex 1 : 1 1 
+
+
+--------------------------------------------------------------------------------------------------
+GRAPH NUMBER: 4
+Number of Vertices: 2
+Number of Edges: 4
+Edge set: [(0, 1), (0, 1), (0, 1), (0, 1)]
+The following rotation system describes a minimal separating embedding of the graph into a surface of genus 1
+vertex 0 : 0 1 2 3 
+vertex 1 : 0 1 2 3 
