@@ -33,9 +33,10 @@ import igraph
 import itertools
 import numpy
 import logging
+import networkx # Used only for checking for isomorphisms between multigraphs (iGraph doesn't support isomorphism checks for multigraphs).
 
 # Using basic logger configuration.
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 def generateCandidateGraphs():
@@ -65,10 +66,19 @@ def generateCandidateGraphs():
 				if hasNoVertexOfOddDegree(graph) and allDegreeTwoVerticesAreBoomerangs(graph) and atMostGPlusOneBoomerangs(graph):
 					temp.append(graph.copy()) # Store this candidate graph in the list named 'temp'.
 	## (2) Remove any isomorphic duplicates.
+	logger.debug('Removing isomorphic copies')
 	C_g = removeIsomorphicCopies(temp)
 	logger.info('Completed generation of candidtate graphs.')
-	logger.debug('Total number of candidate graphs: %s.', len(C_g))
+	logger.info('Total number of candidate graphs: %s.', len(C_g))
+
 	return C_g
+
+def convertFromIgraphToNetworkX(igraph_graph):
+	# Goal: take an igraph graph, convert it into a networkx graph, and output the networkx graph.
+	E = igraph_graph.get_edgelist()
+	networkx_graph = networkx.MultiGraph()
+	networkx_graph.add_edges_from(E)
+	return networkx_graph
 
 def removeIsomorphicCopies(temp):
 	C_g = []
@@ -76,7 +86,7 @@ def removeIsomorphicCopies(temp):
 		# Pop the first graph from temp and insert it at the begining of C_g.
 		C_g.insert(0, temp.pop(0))
 		# Remove from temp all graphs isomorphic to C_g[0].
-		temp = [x for x in temp if not C_g[0].isomorphic_vf2(x)]
+		temp = [x for x in temp if not networkx.is_isomorphic(convertFromIgraphToNetworkX(C_g[0]), convertFromIgraphToNetworkX(x))]
 	C_g.reverse()
 	return C_g
 
@@ -150,6 +160,7 @@ def generateAllGraphs(V, E):
 			del newGraph
 
 	# TODO add the single isolated loop to this list if needed. Alternatiecly, we could add it at the end.
+
 	return allGraphs
 
 def findMinimalSeparatingGraphsIn(C_g):
@@ -158,6 +169,7 @@ def findMinimalSeparatingGraphsIn(C_g):
 	# Goal: Check each graph in C_g to see if it has a minimal separating embedding in a surface of genus g.
 	G_g = []
 	for candidateGraph in C_g:
+		logger.info('Checking candidate graph number %s of %s. [%s percent complete]', C_g.index(candidateGraph)+1, len(C_g), round(100*(C_g.index(candidateGraph)+1)/len(C_g)) )
 		logger.debug('\n Checking graph with edge list %s', candidateGraph.get_edgelist())
 		if thereExistsAMinimalSeparatingEmbeddingOf(candidateGraph):
 			logger.debug('Found a minimal separating embedding')
@@ -166,11 +178,11 @@ def findMinimalSeparatingGraphsIn(C_g):
 
 def reportResults(G_g):
 	#TODO
-	logger.info('G_g is %s', G_g)
 	for graph in G_g: #REMOVE 
 		print graph.get_edgelist()  #REMOVE 
 	logger.info('G_g has size %s', len(G_g))
 	return
+
 
 def thereExistsAMinimalSeparatingEmbeddingOf(candidateGraph):
 	global g
@@ -195,7 +207,7 @@ def thereExistsAMinimalSeparatingEmbeddingOf(candidateGraph):
 def isTwoSided(rotationSystem, candidateGraph):
 	# Goal: Return True is rotationSystem is two-sided, and return False otherwise.
 	# Get the number of edges in the graph.
-	numOfEdges = len(list(candidateGraph.es()))
+	numOfEdges = candidateGraph.ecount()
 	# Get the list of boundary components of the reduced band decomposition corresponding to rotationSystem.
 	boundaryComponents = getBoundaryComponents(rotationSystem)
 	# Consider every possible partition of the boundary components into two cells (which we'll call 'black' and 'white').
@@ -307,7 +319,7 @@ def generateAllRotationSystemsOn(candidateGraph):
 	incidentEdgeEnds = []	# incidentEdgeEnds[v] will return a list of edges incident to vertex v.
 							# NOTE: Edges are labeled by thier index in candidateGraph.get_edgelist(). 
 							# NOTE: For example, edge '4' refers to candidateGraph.get_edgelist()[4].
-	for v in range(0, len(candidateGraph.vs())):
+	for v in range(0, candidateGraph.vcount()):
 		edgeEndsIncidentToV = [[edgeIndex, 0] for edgeIndex, (edgeEndZero, edgeEndOne) in enumerate(candidateGraph.get_edgelist()) if edgeEndZero==v]
 		edgeEndsIncidentToV += [[edgeIndex, 1] for edgeIndex, (edgeEndZero, edgeEndOne) in enumerate(candidateGraph.get_edgelist()) if edgeEndOne==v]
 		incidentEdgeEnds.insert(v, edgeEndsIncidentToV)
@@ -317,10 +329,10 @@ def generateAllRotationSystemsOn(candidateGraph):
 
 	allPossibleRotationsAt = []
 
-	for v in range(0,len(candidateGraph.vs())):
+	for v in range(0,candidateGraph.vcount()):
 		allPossibleRotationsAt.insert(v, rotationsUpToCyclicPermutation(incidentEdgeEnds[v]))
 	## (3) Generate all rotation systems on candidateGraph.
-	listOfRotationOptions = [allPossibleRotationsAt[v] for v in range(0, len(candidateGraph.vs()))]
+	listOfRotationOptions = [allPossibleRotationsAt[v] for v in range(0, candidateGraph.vcount())]
 	allRotationSystems = [list(rotationSystem) for rotationSystem in itertools.product(*listOfRotationOptions)]
 	# Return the list.
 	return allRotationSystems
@@ -426,7 +438,7 @@ def rotationsUpToCyclicPermutation(listOfEdgeEnds):
 def main():
 	global g
 	g = 2 # Note: g must be greater than 0.
-	logger.info('Initiating search for minimal separating graphs in surfaces of genus %s', g)
+	logger.info('Initiating search for minimal separating graphs in orientable surfaces of genus %s', g)
 	## (1) Generate the finite set, C_g, of candidate graphs for genus g.
 	C_g = generateCandidateGraphs()
 	## (2) Check each graph in C_g to determine whether or not it has a minimal separating embedding in a surface of genus g.
