@@ -1,8 +1,5 @@
 # min-sep-sets
-Classifying Minimal Separating Sets of Low Genus Surfaces
-
-TODO: Explain coding style.
-TODO: Give high level overview of rotationsUpToCyclicPermutation(listOfEdgeEnds).
+Classifying Minimal Separating Sets of Orientable Surfaces of Low Genus
 
 ## Getting Started
 #### If you DO have admin priveleges on your machine then use this method:
