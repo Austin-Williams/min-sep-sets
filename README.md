@@ -8,6 +8,8 @@ Install python-igraph:
 
 `$ sudo pip install python-igraph`
 
+See [python-igraph installation instructions](http://igraph.org/python/) if you have trouble installing igraph.
+
 Install NetworkX:
 
 `$ sudo pip install networkx`
