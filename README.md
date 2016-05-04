@@ -26,7 +26,7 @@ Run the program:
 
 `$ python findMinSepGraphs.py`
 
-Done! The results will be output in a file named `minsep_graphs_for_genus_g.txt`.
+Done! The results will be output in a file named `minsep_graphs_for_genus_2.txt`.
 
 Note: findMinSepGraphs.py only outputs the minimal separating graphs -- not the minimal separating rotation systems. If you want to find the minimal separating rotation systems, then run `$ python findMinSepRots.py`. The results will be output to a file named `minsep_rotation_systems_for_genus_2.txt`.
 
@@ -61,7 +61,7 @@ Run the program:
 
 `$ python findMinSepGraphs.py`
 
-The results will be output in a file named `minsep_graphs_for_genus_g.txt`.
+The results will be output in a file named `minsep_graphs_for_genus_2.txt`.
 
 Note: findMinSepGraphs.py only outputs the minimal separating graphs -- not the minimal separating rotation systems. If you want to find the minimal separating rotation systems, then run `$ python findMinSepRots.py`. The results will be output to a file named `minsep_rotation_systems_for_genus_2.txt`.
 
