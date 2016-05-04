@@ -24,6 +24,11 @@
 
 # This program is an implementation of an algorithm designed by Austin Williams and J.J.P. Veerman.
 
+# TODO:
+# 	(2) identify uniqueBoundaryComponentPartitions for each unique minsep embedding
+#	(3) display the results from (2) (above) in the same textfiles as (1) above.
+#	(4) Wrap up loose todo's and remove's
+
 import igraph
 import itertools
 import numpy
@@ -169,15 +174,14 @@ def findMinimalSeparatingGraphsIn(C_g):
 			G_g.append([candidateGraph,existsAMinSepEmbedding[1]])
 	return G_g
 
-def reportResults(G_g):
+def reportMinimalSeparatingGraphs(G_g):
 	# Goal: This function simply displays the results to the command line and stores the results to G_g.txt.
 	# NOTE: In order to make the command-line display of the results easier on the eye, we use 'print' instead of 'logger'.
 	global g
 	textToSave = ""
 	textToSave += '================================================================================================== \n\n'
 	textToSave += 'Computation complete. All minimal separating graphs have been found for genus ' + str(g) + '. Results are displayed below.\n\n'
-	textToSave += 'There are a total of ' + str(len(G_g)) + ' minimal separating graphs for genus ' + str(g) + '. The graphs are listed below.'
-	print textToSave
+	textToSave += 'There are a total of ' + str(len(G_g)) + ' minimal separating graphs for genus ' + str(g) + '.\n\nThe graphs are listed below.'
 	for result in G_g:
 		graph = result[0]
 		rotationSystem = result[1]
@@ -186,22 +190,20 @@ def reportResults(G_g):
 		V = graph.vcount()	# Number of vertices
 		textToDisplay = ""  # This will be displayed to the command line and stored to a file.
 		textToDisplay += '\n\n--------------------------------------------------------------------------------------------------\n'
-		textToDisplay += 'GRAPH NUMBER: ' + str([x for [x,y] in G_g].index(graph) + 1) + '\n'
+		textToDisplay += 'GRAPH NUMBER: ' + str([x for [x,y] in G_g].index(graph)) + '\n'
 		textToDisplay += 'Number of Vertices: ' + str(V) + '\n'
 		textToDisplay += 'Number of Edges: ' + str(E) + '\n'
 		textToDisplay += 'Edge set: ' + str(graph.get_edgelist()) + '\n'
-		textToDisplay += 'The following rotation system describes a minimal separating embedding of the graph into a surface of genus ' + str(((E-V+n)/2 - 1)) + '\n'
+		textToDisplay += 'Witness: The following rotation system describes a minimal separating embedding of the graph into a surface of genus ' + str(((E-V+n)/2 - 1)) + '.' +'\n'
 		for vertex in range(len(rotationSystem)):
 			textToDisplay += "vertex " + str(vertex) + " : "
 			for edge in rotationSystem[vertex]:
 				textToDisplay += str(edge[0]) + " "
 			textToDisplay += "\n"
-		print textToDisplay
 		textToSave += textToDisplay
 	f = open( 'minsep_graphs_for_genus_'+str(g)+'.txt', 'w' )
 	f.write( textToSave )
 	f.close()
-	print'\n\n--------------------------------------------------------------------------------------------------\n'
 	logger.info('The minimal separating graphs for genus %s have been stored in the textfile named "minsep_graphs_for_genus_'+str(g)+'.txt"', g)
 	return
 
@@ -213,18 +215,23 @@ def thereExistsAMinimalSeparatingEmbeddingOf(candidateGraph):
 	## (1) Generate all rotation systems on candidateGraph.
 	rotationSystems = generateAllRotationSystemsOn(candidateGraph)
 	logger.debug('Number of rotation systems on this graph: %s ', len(rotationSystems))
-	## (2) Check whether any of them have a minimal separating embedding into a surface of genus 2.
+	## (2) Check whether any of them have a minimal separating embedding into a surface of genus g.
 	for rotationSystem in rotationSystems:
-		if satisfiesTheorem4(rotationSystem,candidateGraph):
-			if isTwoSided(rotationSystem, candidateGraph):
-				logger.debug('Found a rotation system that is both two-sided and satisfiestheorem 4')
-				return [True,rotationSystem]
-			else:
-				logger.debug('DID NOT find a two-sided rotation system')
-		else:
-			logger.debug('DOES NOT satisfy Theorem4')
+		if isAMinimalSeparatingEbedding(rotationSystem, candidateGraph):
+			return [True,rotationSystem]
 	logger.debug('This graph DOES NOT have a minimal separating embedding in genus %s \n\n', g)
 	return [False]
+
+def isAMinimalSeparatingEbedding(rotationSystem, candidateGraph):
+	if satisfiesTheorem4(rotationSystem,candidateGraph):
+		if isTwoSided(rotationSystem, candidateGraph):
+			logger.debug('Found a rotation system that is both two-sided and satisfiestheorem 4')
+			return True
+		else:
+			logger.debug('DID NOT find a two-sided rotation system')
+	else:
+		logger.debug('DOES NOT satisfy Theorem4')
+	return False
 
 def isTwoSided(rotationSystem, candidateGraph):
 	# Goal: Return True is rotationSystem is two-sided, and return False otherwise.
@@ -458,17 +465,179 @@ def rotationsUpToCyclicPermutation(listOfEdgeEnds):
 				rotationsToReturn.append(standardRepresentative)
 	return rotationsToReturn
 
+def rotationSystemIsNew(givenRotationSystem, listOfRotationSystems):
+	# Goal: return True if and only if givenRotationSystem does not have an equivalent (up to relabelling of vertices and edges) rotation system in listOfRotationSystems.
+	## (1) If listOfRotationSystems is empty, return True.
+	if (len(listOfRotationSystems) == 0):
+		return True
+	## (2) Compare the given rotation system to each rotation system in listOfRotationSystems.
+	for rotationSystemToCompare in listOfRotationSystems:
+		if areEquivalentRotationSystems(givenRotationSystem, rotationSystemToCompare):
+			return False
+	return True
+
+def areEquivalentRotationSystems(firstRotationSystem, secondRotationSystem):
+	# Goal: Return Tru if and only if firstRotationSystem is equivalent to secondRotationSystem (up to a relabelling of the vertices and edges).
+	# Write each rotation system succinctly; so that only the edges (and not the edge ends) are listed.
+	# This will simplify some calculations later.
+	succinctFirstRotationSystem = [[e for [e,x] in v] for v in firstRotationSystem]
+	succinctSecondRotationSystem = [[e for [e,x] in v] for v in secondRotationSystem]
+	## (1) Use heuristics to see if it's even reasonable for the two rotation systems to be equivalent before checking by brute force.
+	# Huristic 1 -- both rotation systems have the same number of vertices.
+	if not (len(firstRotationSystem) == len(secondRotationSystem)):
+		return False
+	# Huristic 2 -- both rotation systems have the same number of edges.
+	if not (sum([len(r) for r in succinctFirstRotationSystem]) == sum([len(r) for r in succinctSecondRotationSystem])):
+		return False
+	# Huristic 3 -- both rotation systems have the same number of boundary components (n).
+	if not (sorted([len(b) for b in getBoundaryComponents(firstRotationSystem)]) == sorted([len(b) for b in getBoundaryComponents(secondRotationSystem)])):
+		return False
+	## (2) Check every possible vertex and edge relabelling of firstRotationSystem.
+	V = len(firstRotationSystem)	# Number of vertices in the underlying graph.
+	E = sum([len(r) for r in succinctFirstRotationSystem])/2	# Number of edges in the underlying graph.
+	# Generate every possible permutation of the numbers [0,...,V-1]
+	vertexPermutations = list(itertools.permutations(range(V)))
+	# Generate every possible permutation of the edges [0,...,E-1]
+	edgePermutations = list(itertools.permutations(range(E)))
+	# Try every possible relabelling of the vertices
+	for vertexPermutation in vertexPermutations:
+		# Relabel the vertices in succinctFirstRotationSystem according to the vertexPermutation
+		vertexRelabelledSuccinctFirstRotationSystem = [succinctFirstRotationSystem[i] for i in vertexPermutation]
+		# Check whether the degree(s) of the (re)labelled vertices match.
+		if not ([len(v) for v in vertexRelabelledSuccinctFirstRotationSystem] == [len(v) for v in succinctSecondRotationSystem]):
+		# If they don't we can continue out to the next vertexPermutation
+			continue
+		# Try every possible relabelling of the edges
+		for edgePermutation in edgePermutations:
+			# Relabel the edges in succinctFirstRotationSystem according to the edgePermutation
+			edgeAndVertexRelabelledSuccinctFirstRotationSystem = [[edgePermutation[e] for e in v] for v in vertexRelabelledSuccinctFirstRotationSystem]
+			# Compare the relabelledSuccinctFirstRotationSystem to succinctSecondRotationSystem. If they are equal then return True.
+			# This requires checking the cyclic permutations of edges.
+			if areEquivalentUpToCyclicPermutationOfEdges(edgeAndVertexRelabelledSuccinctFirstRotationSystem, succinctSecondRotationSystem):
+				return True
+	return False
+
+def areEquivalentUpToCyclicPermutationOfEdges(succinctFirstRotationSystem, succinctSecondRotationSystem):
+	# Goal: Return True exactly when succinctFirstRotationSystem and succinctSecondRotationSystem differ only by a cyclic permutation of the edges at the vertices.
+	# Note: It assumed here that the two input rotation systems are of the same graph.
+	V = len(succinctFirstRotationSystem)	# Number of vertices in the underlying graph.
+	for i in range(V):
+		# For each pair of corresponding vertices (the i-th vertex of the first and second graph), check to see whether they differ by a cyclic permutation of edges.
+		firstRotation = succinctFirstRotationSystem[i]
+		secondRotation = succinctSecondRotationSystem[i]
+		for j in range(len(succinctFirstRotationSystem[i])):
+			equivRotations = False 	# This is change to True if they are found to be equivalent
+			# Shift the elements of firstRotation once.
+			firstRotation.append(firstRotation.pop(0))
+			# Check to see if the rotations match.
+			if (firstRotation == secondRotation):
+				equivRotations = True
+				break
+		if (equivRotations == False):
+			return False
+	return True
+
+
+def detailMinimalSeparatingEmbeddings(G_g):
+	# Goal: Return a list, E_g, of all two-sided rotation systems (unique up to a relabelling of vertices and edges) for each graph in G_g.
+	# Initialize variables
+	E_g=[{} for x in range(len(G_g))]
+	for i in range(len(G_g)):
+		logger.info('Gathering info for graph number %s of %s. [%s percent complete]', i+1, len(G_g), round( 100*(i+1)/len(G_g) )-1 )
+		# Initialize variables
+		graph = G_g[i][0]
+		E_g[i]['graph'] = graph
+		E_g[i]['minimumGenus'] = 9999	# This will be replaced by the lowest genus for which graph G_g[i] has a minimal separating embedding.
+		E_g[i]['maximumGenus'] = -1		# This will be replaced by the lowest genus for which graph G_g[i] has a maximal separating embedding.
+		E_g[i]['minimalSeparatingRotationSystems']=[]
+		## (1) Generate all rotation systems on candidateGraph.
+		rotationSystems = generateAllRotationSystemsOn(graph)
+		logger.debug('Number of rotation systems on this graph: %s ', len(rotationSystems))
+		## (2) For each rotation system in rotationSystems determine whether it is minimally seprarting in genus <= g.
+		for rotationSystem in rotationSystems:
+			if isAMinimalSeparatingEbedding(rotationSystem, graph):
+				## (3) If it is a minimal separating rotation system, check whether we've already stored one equivalent to it (up to to a relabelling of vertices and edges).
+				if rotationSystemIsNew(rotationSystem, [x['rotationSystem'] for x in E_g[i]['minimalSeparatingRotationSystems']]):
+					## (4) If the rotation system is a new one, then gather information about it and store it.
+					rotationSystemInfo = {}
+					rotationSystemInfo['rotationSystem'] = rotationSystem
+					rotationSystemInfo['boundaryComponents'] = getBoundaryComponents(rotationSystem)
+					rotationSystemInfo['n'] = len(rotationSystemInfo['boundaryComponents']) # Number of boundary components
+					E = graph.ecount()	# Number of edges 
+					V = graph.vcount()	# Number of vertices
+					n = rotationSystemInfo['n']
+					rotationSystemInfo['minGenus'] = (E-V+n)/2 - 1 # Genus for which this rotation system corresponds to a cellular minimial separating embedding.
+					rotationSystemInfo['uniqueBoundaryComponentPartitions'] = []	# TODO
+					# Update minimumGenus and maximumGenus
+					E_g[i]['minimumGenus'] = min(E_g[i]['minimumGenus'], rotationSystemInfo['minGenus'])
+					E_g[i]['maximumGenus'] = max(E_g[i]['maximumGenus'], rotationSystemInfo['minGenus'])
+					E_g[i]['minimalSeparatingRotationSystems'].append(rotationSystemInfo)
+	return E_g
+
+def reportMinimalSeparatingEmbeddings(E_g):
+	#Goal: Display and store results from detailMinimalSeparatingEmbeddings.
+	# NOTE: In order to make the command-line display of the results easier on the eye, we use 'print' instead of 'logger'.
+	global g
+	textToSave = ""
+	textToSave += '=================================================================== \n'
+	textToSave += '=================================================================== \n\n'
+	textToSave += 'Computation complete. All minimal separating graphs have been found for genus ' + str(g) + '. Results are displayed below.\n\n'
+	textToSave += 'There are a total of ' + str(len(E_g)) + ' minimal separating graphs for genus ' + str(g) + '.\n The graphs and their details are listed below. \n\n'
+	for i in range(len(E_g)):
+		result = E_g[i]
+		graph = result['graph']
+		E = graph.ecount()	# Number of edges 
+		V = graph.vcount()	# Number of vertices
+		textToSave += '******************************************************************* \n\n'
+		textToSave += 'GRAPH NUMBER: ' + str(i+1) + '\n\n'
+		textToSave += 'Number of Vertices: ' + str(V) + '\n'
+		textToSave += 'Number of Edges: ' + str(E) + '\n'
+		textToSave += 'Edge set: ' + str(graph.get_edgelist()) + '\n\n'
+		textToSave += 'Total number of rotation systems on this graph that correspond to a minimal separating embedding of a surface of genus <=' +str(g) + ': ' + str(len(result['minimalSeparatingRotationSystems'])) + '\n\n'
+		textToSave += 'Each of those ' + str(len(result['minimalSeparatingRotationSystems'])) + ' minimal separating rotation system has a minimum genus, minGenus, for which it is minimally separating. ' 
+		textToSave += 'This minimum genus is computed as (E-V+n)/2 - 1, where n is the number of boundary components of the corresponding reduced band decomposition.\n\n'
+		textToSave += 'Iterating over all rotation systems that are minimally separating for genus g <= ' + str(g) + ' we find that the smallest value minGenus takes is ' + str(result['minimumGenus']) + '.' + '\n\n'
+		textToSave += 'Iterating over all rotation systems that are minimally separating for genus g <= ' + str(g) + ' we find that the largest value minGenus takes is ' + str(result['maximumGenus']) + '.' + '\n\n'
+		textToSave += 'The details of all ' + str(len(result['minimalSeparatingRotationSystems'])) + ' rotations systems on this graph that correspond to minimal separating embeddings in genus g <= ' + str(g) + ' are shown below. \n\n'
+		for j in range(len(result['minimalSeparatingRotationSystems'])):
+			textToSave += '            ------------------------------------------------------ \n'
+			textToSave += '            Rotation System ' + str(j+1) + ' of ' + str(len(result['minimalSeparatingRotationSystems'])) + ' for graph number ' + str(i+1) + '\n\n'
+			rotationSystem = result['minimalSeparatingRotationSystems'][j]['rotationSystem']
+			textToSave += '            Rotation System:\n\n'
+			for vertex in range(len(rotationSystem)):
+				textToSave += '            vertex ' + str(vertex) + ' : '
+				for edge in rotationSystem[vertex]:
+					textToSave += str(edge[0]) + " "
+				textToSave += "\n"
+			textToSave += '\n            Number, n, of boundary components: ' + str(result['minimalSeparatingRotationSystems'][j]['n']) + '\n'
+			textToSave += '            Minimum genus (computed as (E-V+n)/2 - 1): ' + str(result['minimalSeparatingRotationSystems'][j]['minGenus']) + '\n\n'
+			textToSave += '            The ' + str(str(result['minimalSeparatingRotationSystems'][j]['n'])) + ' boundary components are: \n'
+			for k in range(len(result['minimalSeparatingRotationSystems'][j]['boundaryComponents'])):
+				component = result['minimalSeparatingRotationSystems'][j]['boundaryComponents'][k]
+				textToSave += '                B' + str(k) + ': ' + str(component) + '\n'
+	f = open( 'minsep_rotation_systems_for_genus_'+ str(g) + '.txt', 'w' )
+	f.write( textToSave )
+	f.close()
+	print'\n\n-------------------------------------------------------------------\n'
+	logger.info('The minimal separating graphs for genus %s have been stored in the textfile named "minsep_rotation_systems_for_genus_'+str(g)+'.txt"', g)
+	return
+
 def main():
 	global g
-	g = 2 # Note: g must be greater than 0.
+	g = 2 # NOTE: g must be greater than 0.
 	logger.info('Initiating search for minimal separating graphs in orientable surfaces of genus %s', g)
 	## (1) Generate the finite set, C_g, of candidate graphs for genus g.
 	C_g = generateCandidateGraphs()
 	## (2) Check each graph in C_g to determine whether or not it has a minimal separating embedding in a surface of genus g.
 	G_g = findMinimalSeparatingGraphsIn(C_g)
-	## (3) Log and display the results.
-	reportResults(G_g)
-	logger.info('Program finished running successfully.')
+	# NOTE: At this point we have enough enough information to classify all minimal separating sets up to underlying graph.
+	## (3) Output the minimal separating graphs to a file.
+	reportMinimalSeparatingGraphs(G_g)
+	## (4) For each graph in G_g, list all possible minimal separating embeddings of the graph.
+	# NOTE: This information is used to help classify all minimal separating sets up to surface homeomorphism.
+	E_g = detailMinimalSeparatingEmbeddings(G_g)
+	## (5) Log and display the results stored in E_g.
+	reportMinimalSeparatingEmbeddings(E_g)
 	return
 
 if __name__ == '__main__':

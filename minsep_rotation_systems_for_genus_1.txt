@@ -1,0 +1,168 @@
+=================================================================== 
+=================================================================== 
+
+Computation complete. All minimal separating graphs have been found for genus 1. Results are displayed below.
+
+There are a total of 5 minimal separating graphs for genus 1.
+ The graphs and their details are listed below. 
+
+******************************************************************* 
+
+GRAPH NUMBER: 1
+
+Number of Vertices: 1
+Number of Edges: 1
+Edge set: [(0, 0)]
+
+Total number of rotation systems on this graph that correspond to a minimal separating embedding of a surface of genus <=1: 1
+
+Each of those 1 minimal separating rotation system has a minimum genus, minGenus, for which it is minimally separating. This minimum genus is computed as (E-V+n)/2 - 1, where n is the number of boundary components of the corresponding reduced band decomposition.
+
+Iterating over all rotation systems that are minimally separating for genus g <= 1 we find that the smallest value minGenus takes is 0.
+
+Iterating over all rotation systems that are minimally separating for genus g <= 1 we find that the largest value minGenus takes is 0.
+
+The details of all 1 rotations systems on this graph that correspond to minimal separating embeddings in genus g <= 1 are shown below. 
+
+            ------------------------------------------------------ 
+            Rotation System 1 of 1 for graph number 1
+
+            Rotation System:
+
+            vertex 0 : 0 0 
+
+            Number, n, of boundary components: 2
+            Minimum genus (computed as (E-V+n)/2 - 1): 0
+
+            The 2 boundary components are: 
+                B0: [0]
+                B1: [0]
+******************************************************************* 
+
+GRAPH NUMBER: 2
+
+Number of Vertices: 1
+Number of Edges: 2
+Edge set: [(0, 0), (0, 0)]
+
+Total number of rotation systems on this graph that correspond to a minimal separating embedding of a surface of genus <=1: 1
+
+Each of those 1 minimal separating rotation system has a minimum genus, minGenus, for which it is minimally separating. This minimum genus is computed as (E-V+n)/2 - 1, where n is the number of boundary components of the corresponding reduced band decomposition.
+
+Iterating over all rotation systems that are minimally separating for genus g <= 1 we find that the smallest value minGenus takes is 1.
+
+Iterating over all rotation systems that are minimally separating for genus g <= 1 we find that the largest value minGenus takes is 1.
+
+The details of all 1 rotations systems on this graph that correspond to minimal separating embeddings in genus g <= 1 are shown below. 
+
+            ------------------------------------------------------ 
+            Rotation System 1 of 1 for graph number 2
+
+            Rotation System:
+
+            vertex 0 : 0 0 1 1 
+
+            Number, n, of boundary components: 3
+            Minimum genus (computed as (E-V+n)/2 - 1): 1
+
+            The 3 boundary components are: 
+                B0: [0]
+                B1: [0, 1]
+                B2: [1]
+******************************************************************* 
+
+GRAPH NUMBER: 3
+
+Number of Vertices: 1
+Number of Edges: 3
+Edge set: [(0, 0), (0, 0), (0, 0)]
+
+Total number of rotation systems on this graph that correspond to a minimal separating embedding of a surface of genus <=1: 1
+
+Each of those 1 minimal separating rotation system has a minimum genus, minGenus, for which it is minimally separating. This minimum genus is computed as (E-V+n)/2 - 1, where n is the number of boundary components of the corresponding reduced band decomposition.
+
+Iterating over all rotation systems that are minimally separating for genus g <= 1 we find that the smallest value minGenus takes is 1.
+
+Iterating over all rotation systems that are minimally separating for genus g <= 1 we find that the largest value minGenus takes is 1.
+
+The details of all 1 rotations systems on this graph that correspond to minimal separating embeddings in genus g <= 1 are shown below. 
+
+            ------------------------------------------------------ 
+            Rotation System 1 of 1 for graph number 3
+
+            Rotation System:
+
+            vertex 0 : 0 1 2 0 1 2 
+
+            Number, n, of boundary components: 2
+            Minimum genus (computed as (E-V+n)/2 - 1): 1
+
+            The 2 boundary components are: 
+                B0: [0, 1, 2]
+                B1: [0, 1, 2]
+******************************************************************* 
+
+GRAPH NUMBER: 4
+
+Number of Vertices: 2
+Number of Edges: 2
+Edge set: [(0, 0), (1, 1)]
+
+Total number of rotation systems on this graph that correspond to a minimal separating embedding of a surface of genus <=1: 1
+
+Each of those 1 minimal separating rotation system has a minimum genus, minGenus, for which it is minimally separating. This minimum genus is computed as (E-V+n)/2 - 1, where n is the number of boundary components of the corresponding reduced band decomposition.
+
+Iterating over all rotation systems that are minimally separating for genus g <= 1 we find that the smallest value minGenus takes is 1.
+
+Iterating over all rotation systems that are minimally separating for genus g <= 1 we find that the largest value minGenus takes is 1.
+
+The details of all 1 rotations systems on this graph that correspond to minimal separating embeddings in genus g <= 1 are shown below. 
+
+            ------------------------------------------------------ 
+            Rotation System 1 of 1 for graph number 4
+
+            Rotation System:
+
+            vertex 0 : 0 0 
+            vertex 1 : 1 1 
+
+            Number, n, of boundary components: 4
+            Minimum genus (computed as (E-V+n)/2 - 1): 1
+
+            The 4 boundary components are: 
+                B0: [0]
+                B1: [0]
+                B2: [1]
+                B3: [1]
+******************************************************************* 
+
+GRAPH NUMBER: 5
+
+Number of Vertices: 2
+Number of Edges: 4
+Edge set: [(0, 1), (0, 1), (0, 1), (0, 1)]
+
+Total number of rotation systems on this graph that correspond to a minimal separating embedding of a surface of genus <=1: 1
+
+Each of those 1 minimal separating rotation system has a minimum genus, minGenus, for which it is minimally separating. This minimum genus is computed as (E-V+n)/2 - 1, where n is the number of boundary components of the corresponding reduced band decomposition.
+
+Iterating over all rotation systems that are minimally separating for genus g <= 1 we find that the smallest value minGenus takes is 1.
+
+Iterating over all rotation systems that are minimally separating for genus g <= 1 we find that the largest value minGenus takes is 1.
+
+The details of all 1 rotations systems on this graph that correspond to minimal separating embeddings in genus g <= 1 are shown below. 
+
+            ------------------------------------------------------ 
+            Rotation System 1 of 1 for graph number 5
+
+            Rotation System:
+
+            vertex 0 : 0 1 2 3 
+            vertex 1 : 0 1 2 3 
+
+            Number, n, of boundary components: 2
+            Minimum genus (computed as (E-V+n)/2 - 1): 1
+
+            The 2 boundary components are: 
+                B0: [0, 1, 2, 3]
+                B1: [0, 1, 2, 3]

@@ -26,7 +26,9 @@ Run the program:
 
 `$ python findMinSepGraphs.py`
 
-Done!
+Done! The results will be output in a file named `minsep_graphs_for_genus_g.txt`.
+
+Note: findMinSepGraphs.py only outputs the minimal separating graphs -- not the minimal separating rotation systems. If you want to find the minimal separating rotation systems, then run `$ python findMinSepRots.py`. The results will be output to a file named `minsep_rotation_systems_for_genus_2.txt`.
 
 #### If you DO NOT have admin priveleges on your machine then use this method:
 If you don't have admin rights to your machine then you may not be able to install python-igraph and NetworkX using the above method. Instead, try using virtualenv as follows.
@@ -59,7 +61,9 @@ Run the program:
 
 `$ python findMinSepGraphs.py`
 
-The program will display the results in the command line, and will also store the results in a text file on your machine.
+The results will be output in a file named `minsep_graphs_for_genus_g.txt`.
+
+Note: findMinSepGraphs.py only outputs the minimal separating graphs -- not the minimal separating rotation systems. If you want to find the minimal separating rotation systems, then run `$ python findMinSepRots.py`. The results will be output to a file named `minsep_rotation_systems_for_genus_2.txt`.
 
 When you are finished running the program, deactivate the virtual environment:
 
